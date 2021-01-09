@@ -1,6 +1,6 @@
 # ABM_project
 ## Usage
-Run program with: mesa runserver. <\br>
+Run program with: mesa runserver. </br>
 Or alternatively with: python run.py
 
 ### Authors
