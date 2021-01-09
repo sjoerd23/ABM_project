@@ -1,4 +1,5 @@
 # ABM_project
+## Run program with: mesa runserver. Or with: python run.py
 
 ### Authors
 Coen Prins *(11332441, coen_prins@hotmail.com)*</br>
