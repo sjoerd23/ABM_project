@@ -12,5 +12,5 @@ class Customer(Agent):
         self.model.grid.move_agent(self, step)
 
     def step(self):
-        self.move()
+	    self.move()
 
