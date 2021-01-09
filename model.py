@@ -4,7 +4,19 @@ from mesa.time import RandomActivation
 import agent
 
 
-class OurModel(Model):
+class CovidModel(Model):
+    """Model of agents (Customers) in a store
+
+    Args:
+        N_customers (int): total number of customers
+        width, height (int): dimensions of grid
+
+    Attributes:
+        grid: grid of environment
+        schedule: schedule for updating model to next time frame
+        N_customers (int): total number of customers
+
+    """
 
     def __init__(self, N_customers=20, width=20, height=20):
 

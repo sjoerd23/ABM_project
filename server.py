@@ -13,18 +13,22 @@ def agent_portrayal(agent):
                  "r": 0.5,
                  "text": agent.unique_id,
                  "text_color": "white"}
-                 
+
     return portrayal
 
 
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
-grid = CanvasGrid(agent_portrayal, 20, 20, 500, 500)
+width, height = 20, 20
+grid = CanvasGrid(agent_portrayal, width, height, 500, 500)
 
 
 # Create the server, and pass the grid and the graph
-server = ModularServer(model.OurModel,
+N_customers = 20
+server = ModularServer(model.CovidModel,
                        [grid],
-                       "OurModel Model",
-                       {})
+                       "Indoor Covid model",
+                       {"N_customers": N_customers, "width": width, "height": height})
 
 server.port = 8521
+
+# moved run to run.py. Gave some issues with me if I placed it here
