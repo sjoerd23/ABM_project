@@ -3,29 +3,40 @@ from mesa.space import MultiGrid
 from mesa.time import RandomActivation
 import agent
 
+
 class OurModel(Model):
 
-	def __init__(self, N_customers=20, width=20, height=20):
+    def __init__(self, N_customers=20, width=20, height=20):
 
-		# init basic properties
-		self.width = width
-		self.height = height
-		self.grid = MultiGrid(self.width, self.height, torus=False)
+        # init basic properties
+        self.grid = MultiGrid(width, height, torus=False)
+        self.schedule = RandomActivation(self)
+        self.running = True     # needed to keep simulation running
 
-		# Start adding customers
-		self.N_customers = 0
-		for i in range(N_customers):
-			self.new_customer(agent.Customer)
+        # Start adding customers
+        self.N_customers = 0
+        for i in range(N_customers):
+            self.new_customer(agent.Customer)
 
-	"""Adds a new agent to a random location on the grid. Returns the created agent"""
-	def new_customer(self, agent_object):
-		self.N_customers += 1
-		
-		x = self.random.randint(0, self.width - 1)
-		y = self.random.randint(0, self.height - 1)
+    def new_customer(self, agent_object):
+        """Adds a new agent to a random location on the grid. Returns the created agent"""
+        self.N_customers += 1
 
-		new_agent = agent_object(self.N_customers, self)
-		self.grid.place_agent(new_agent, (x, y))
+        new_agent = agent_object(self.N_customers, self)
 
-		return new_agent
+        # add agent to a cell
+        x = self.random.randrange(self.grid.width)
+        y = self.random.randrange(self.grid.height)
+        self.grid.place_agent(new_agent, (x, y))
+        self.schedule.add(new_agent)
 
+        return new_agent
+
+    def run_model(self, n_steps=200):
+        """Run model for n_steps"""
+        for i in range(n_steps):
+            self.step()
+
+    def step(self):
+        """Progress simulation by one step """
+        self.schedule.step()

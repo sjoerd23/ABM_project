@@ -10,7 +10,10 @@ def agent_portrayal(agent):
                  "Color": "blue",
                  "Filled": "true",
                  "Layer": 0,
-                 "r": 0.5}
+                 "r": 0.5,
+                 "text": agent.unique_id,
+                 "text_color": "white"}
+                 
     return portrayal
 
 
@@ -21,9 +24,7 @@ grid = CanvasGrid(agent_portrayal, 20, 20, 500, 500)
 # Create the server, and pass the grid and the graph
 server = ModularServer(model.OurModel,
                        [grid],
-                       "WolfSheep Model",
+                       "OurModel Model",
                        {})
 
 server.port = 8521
-
-server.launch()
