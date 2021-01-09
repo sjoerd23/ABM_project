@@ -31,18 +31,25 @@ class CovidModel(Model):
             self.new_customer(agent.Customer)
 
     def is_occupied(self, pos):
-        """Check if a cell is occupied (pos)"""
+        """Check if a cell or region around a cell is occupied (pos)"""
         cell = self.grid.get_cell_list_contents([pos])
         return len(cell) > 0
 
+    def get_unoccupied(self, pos, radius, moore=True):
+        """Returns the unoccupied cells in region around a cell"""
+        neighborhood = self.model.grid.get_neighborhood(pos, radius, moore)
+        neighbours = self.model.grid.get_neighbors(pos, radius, moore)
+        return [x for x in neighbours if x.pos not in neighborhood]
+
     def new_customer(self, agent_object):
         """Adds a new agent to a random location on the grid. Returns the created agent"""
+        pos = self.get_free_pos()
+
         self.N_customers += 1
-        new_agent = agent_object(self.N_customers, self)
+        new_agent = agent_object(self.N_customers, self , pos)
 
         # add agent to a cell
-        x, y = self.get_free_pos()
-        self.grid.place_agent(new_agent, (x, y))
+        self.grid.place_agent(new_agent, pos)
         self.schedule.add(new_agent)
 
         return new_agent

@@ -12,21 +12,17 @@ class Customer(Agent):
 
     """
 
-    def __init__(self, unique_id, model):
+    def __init__(self, unique_id, model, pos):
         super().__init__(unique_id, model)
+        self.pos = pos
 
     def move_keep_distance(self):
         """Moves the agent to a random new location on the grid while trying to keep distance to
         the other agents. If other agents occupies all surrounding cell, this agents will not move
         """
-        # get surrounding cells
+        # get surrounding cells and check if occupied
         neighbor_cells = self.model.grid.get_neighborhood(self.pos, moore=False, include_center=False)
-
-        # possible locations to go to
-        possible_steps = []
-        for neighbor_cell in neighbor_cells:
-            if not self.model.is_occupied(neighbor_cell):
-                possible_steps.append(neighbor_cell)
+        possible_steps = [x for x in neighbor_cells if not self.model.is_occupied(x)]
 
         # randomly move to free spot if possible
         if possible_steps:
