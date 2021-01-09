@@ -30,19 +30,31 @@ class CovidModel(Model):
         for i in range(N_customers):
             self.new_customer(agent.Customer)
 
+    def is_occupied(self, pos):
+        """Check if a cell is occupied (pos)"""
+        cell = self.grid.get_cell_list_contents([pos])
+        return len(cell) > 0
+
     def new_customer(self, agent_object):
         """Adds a new agent to a random location on the grid. Returns the created agent"""
         self.N_customers += 1
-
         new_agent = agent_object(self.N_customers, self)
 
         # add agent to a cell
-        x = self.random.randrange(self.grid.width)
-        y = self.random.randrange(self.grid.height)
+        x, y = self.get_free_pos()
         self.grid.place_agent(new_agent, (x, y))
         self.schedule.add(new_agent)
 
         return new_agent
+
+    def get_free_pos(self):
+        """Find free position on grid. If there are none left, exit program"""
+        if not self.grid.empties:
+            print("Error! No empty cells found!")
+            exit(-1)
+        x, y = self.random.choice(list(self.grid.empties))
+        if not self.is_occupied((x, y)):
+            return (x, y)
 
     def run_model(self, n_steps=200):
         """Run model for n_steps"""

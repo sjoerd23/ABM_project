@@ -23,7 +23,7 @@ grid = CanvasGrid(agent_portrayal, width, height, 500, 500)
 
 
 # Create the server, and pass the grid and the graph
-N_customers = 20
+N_customers = 150
 server = ModularServer(model.CovidModel,
                        [grid],
                        "Indoor Covid model",
@@ -31,4 +31,4 @@ server = ModularServer(model.CovidModel,
 
 server.port = 8521
 
-# moved run to run.py. Gave some issues with me if I placed it here
+# moved server.launch() to run.py. Gave some issues for me if I placed it here
