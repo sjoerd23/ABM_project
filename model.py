@@ -1,6 +1,7 @@
 from mesa import Model
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
+from mesa.datacollection import DataCollector
 
 import agent
 from seir import Seir
@@ -27,6 +28,9 @@ class CovidModel(Model):
         self.schedule = RandomActivation(self)
         self.running = True     # needed to keep simulation running
 
+        # datacollection
+        self.datacollector = DataCollector(model_reporters={}, agent_reporters={"seir_status": "seir"})
+
         # Start adding customers
         self.N_customers = 0
         for i in range(N_customers):
@@ -45,7 +49,6 @@ class CovidModel(Model):
 
     def new_customer(self, agent_object):
         """Adds a new agent to a random location on the grid. Returns the created agent"""
-        self.N_customers += 1
         pos = self.get_free_pos()
 
         # select random seir status for customer
@@ -55,6 +58,8 @@ class CovidModel(Model):
         # add agent to a cell
         self.grid.place_agent(new_agent, pos)
         self.schedule.add(new_agent)
+
+        self.N_customers += 1
 
         return new_agent
 
@@ -74,4 +79,5 @@ class CovidModel(Model):
 
     def step(self):
         """Progress simulation by one step """
+        self.datacollector.collect(self)
         self.schedule.step()

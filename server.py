@@ -2,28 +2,39 @@ from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import ChartModule
 
-import agent
 import model
+from agent import Customer
+from seir import Seir
+
 
 def agent_portrayal(agent):
-    portrayal = {"Shape": "circle",
-                 "Color": "blue",
-                 "Filled": "true",
-                 "Layer": 0,
-                 "r": 0.5,
-                 "text": agent.unique_id,
-                 "text_color": "white"}
+    portrayal = {}
+    if type(agent) == Customer:
+        portrayal = {"Shape": "circle",
+                     "Color": "blue",
+                     "Filled": "true",
+                     "Layer": 0,
+                     "r": 0.5,
+                     "text": agent.unique_id,
+                     "text_color": "white"}
+
+        if agent.seir == Seir.SUSCEPTIBLE:
+             portrayal["Color"] = "green"
+        elif agent.seir == Seir.EXPOSED:
+             portrayal["Color"] = "yellow"
+        elif agent.seir == Seir.INFECTED:
+             portrayal["Color"] = "red"
+        elif agent.seir == Seir.RECOVERED:
+             portrayal["Color"] = "black"
 
     return portrayal
 
-
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
-width, height = 3, 3
+width, height = 20, 20
 grid = CanvasGrid(agent_portrayal, width, height, 500, 500)
 
-
 # Create the server, and pass the grid and the graph
-N_customers = 5
+N_customers = 50
 server = ModularServer(model.CovidModel,
                        [grid],
                        "Indoor Covid model",
