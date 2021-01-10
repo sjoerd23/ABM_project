@@ -18,12 +18,12 @@ def agent_portrayal(agent):
 
 
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
-width, height = 20, 20
+width, height = 10, 10
 grid = CanvasGrid(agent_portrayal, width, height, 500, 500)
 
 
 # Create the server, and pass the grid and the graph
-N_customers = 150
+N_customers = 50
 server = ModularServer(model.CovidModel,
                        [grid],
                        "Indoor Covid model",

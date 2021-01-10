@@ -9,32 +9,27 @@ class Customer(Agent):
         model: model object this agent is part of
 
     Attributes:
+        pos (x, y): positon of agent on grid
+        radius (int): preffered distance in grid cells to other agents
 
     """
 
-    def __init__(self, unique_id, model, pos):
+    def __init__(self, unique_id, model, pos, radius=1):
         super().__init__(unique_id, model)
         self.pos = pos
+        self.radius = radius
 
     def move_keep_distance(self):
         """Moves the agent to a random new location on the grid while trying to keep distance to
         the other agents. If other agents occupies all surrounding cell, this agents will not move
         """
-        # get surrounding cells and check if occupied
-        neighbor_cells = self.model.grid.get_neighborhood(self.pos, moore=False, include_center=False)
-        possible_steps = [x for x in neighbor_cells if not self.model.is_occupied(x)]
+        # get surrounding unoccupied cells in a radius
+        unoccupied_cells = self.model.get_unoccupied(self.pos, self.radius, False)
 
-        # randomly move to free spot if possible
-        if possible_steps:
-            new_cell = self.random.choice(possible_steps)
+        # randomly move to free spot if possible, else don't move
+        if unoccupied_cells:
+            new_cell = self.random.choice(unoccupied_cells)
             self.model.grid.move_agent(self, new_cell)
-        else:
-            # dont move, stand still
-            self.model.grid.move_agent(self, self.pos)
-
-            # force moving to a neighboring cell, even when already occupied by another agent
-            # new_cell = self.random.choice(neighbor_cells)
-
 
     def random_move(self):
         """Moves the agent randomly to a new location on the grid"""
