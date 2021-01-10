@@ -62,5 +62,3 @@ class Customer(Agent):
         """
         self.move_keep_distance()
         self.spread_covid()
-        if self.unique_id == 1:
-            print(self.seir)
