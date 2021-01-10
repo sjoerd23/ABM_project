@@ -1,7 +1,9 @@
 from mesa import Model
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
+
 import agent
+from seir import Seir
 
 
 class CovidModel(Model):
@@ -46,7 +48,7 @@ class CovidModel(Model):
         pos = self.get_free_pos()
 
         self.N_customers += 1
-        new_agent = agent_object(self.N_customers, self , pos)
+        new_agent = agent_object(self.N_customers, self , pos, Seir.SUSCEPTIBLE)
 
         # add agent to a cell
         self.grid.place_agent(new_agent, pos)

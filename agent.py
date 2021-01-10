@@ -11,13 +11,15 @@ class Customer(Agent):
     Attributes:
         pos (x, y): positon of agent on grid
         radius (int): preffered distance in grid cells to other agents
+        seir (Enum Seir): Covid infection status according to SEIR model
 
     """
 
-    def __init__(self, unique_id, model, pos, radius=1):
+    def __init__(self, unique_id, model, pos, seir, radius=1):
         super().__init__(unique_id, model)
         self.pos = pos
         self.radius = radius
+        self.seir = seir
 
     def move_keep_distance(self):
         """Moves the agent to a random new location on the grid while trying to keep distance to
