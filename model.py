@@ -45,10 +45,12 @@ class CovidModel(Model):
 
     def new_customer(self, agent_object):
         """Adds a new agent to a random location on the grid. Returns the created agent"""
+        self.N_customers += 1
         pos = self.get_free_pos()
 
-        self.N_customers += 1
-        new_agent = agent_object(self.N_customers, self , pos, Seir.SUSCEPTIBLE)
+        # select random seir status for customer
+        seir = self.random.choice([Seir.SUSCEPTIBLE, Seir.INFECTED, Seir.RECOVERED])
+        new_agent = agent_object(self.N_customers, self , pos, seir)
 
         # add agent to a cell
         self.grid.place_agent(new_agent, pos)
