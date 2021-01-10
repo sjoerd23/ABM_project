@@ -60,7 +60,6 @@ class CovidModel(Model):
         self.schedule.add(new_agent)
 
         self.N_customers += 1
-
         return new_agent
 
     def get_free_pos(self):
