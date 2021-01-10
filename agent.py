@@ -7,6 +7,8 @@ class Customer(Agent):
     Args:
         unique_id (int): a unique identifier for this agent
         model: model object this agent is part of
+        pos (x, y): positon of agent on grid
+        seir (Enum Seir): Covid infection status according to SEIR model
 
     Attributes:
         pos (x, y): positon of agent on grid
