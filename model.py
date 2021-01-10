@@ -18,18 +18,23 @@ class CovidModel(Model):
         grid: grid of environment
         schedule: schedule for updating model to next time frame
         N_customers (int): total number of customers
+        n_exposed (int): amount of customers EXPOSED to INFECTED
 
     """
 
     def __init__(self, N_customers=20, width=20, height=20):
 
         # init basic properties
+        self.n_exposed = 0
         self.grid = MultiGrid(width, height, torus=False)
         self.schedule = RandomActivation(self)
         self.running = True     # needed to keep simulation running
 
         # datacollection
-        self.datacollector = DataCollector(model_reporters={}, agent_reporters={"seir_status": "seir"})
+        self.datacollector = DataCollector(
+            model_reporters={"n_exposed": "n_exposed"},
+            agent_reporters={"seir_status": "seir"}
+        )
 
         # Start adding customers
         self.N_customers = 0
@@ -53,6 +58,8 @@ class CovidModel(Model):
 
         # select random seir status for customer
         seir = self.random.choice([Seir.SUSCEPTIBLE, Seir.INFECTED, Seir.RECOVERED])
+        if seir == Seir.EXPOSED:
+            self.n_exposed += 1
         new_agent = agent_object(self.N_customers, self , pos, seir)
 
         # add agent to a cell

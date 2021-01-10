@@ -26,17 +26,19 @@ class Customer(Agent):
 
     def spread_covid(self):
         """Spread covid to neighbors if infected, or get infected if there are any infected
-        neighbors
+        neighbors.
         """
         neighbors = self.model.grid.get_neighbors(self.pos, moore=False, radius=1)
         if self.seir == Seir.INFECTED:
             for neighbor in neighbors:
                 if neighbor.seir == Seir.SUSCEPTIBLE:
                     neighbor.seir = Seir.EXPOSED
+                    self.model.n_exposed += 1
         elif self.seir == Seir.SUSCEPTIBLE:
             for neighbor in neighbors:
                 if neighbor.seir == Seir.INFECTED:
                     self.seir = Seir.EXPOSED
+                    self.model.n_exposed += 1
                     return
 
     def move_keep_distance(self):

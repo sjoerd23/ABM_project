@@ -33,10 +33,11 @@ def agent_portrayal(agent):
 width, height = 20, 20
 grid = CanvasGrid(agent_portrayal, width, height, 500, 500)
 
+chart = ChartModule([{"Label": "n_exposed", "Color": "Black"}], data_collector_name="datacollector")
 # Create the server, and pass the grid and the graph
 N_customers = 50
 server = ModularServer(model.CovidModel,
-                       [grid],
+                       [grid, chart],
                        "Indoor Covid model",
                        {"N_customers": N_customers, "width": width, "height": height})
 
