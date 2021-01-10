@@ -13,20 +13,23 @@ class CovidModel(Model):
     Args:
         N_customers (int): total number of customers
         width, height (int): dimensions of grid
+        vaccination_prop (float between 0 and 1): proportion of customers that is vaccinated
 
     Attributes:
+        datacollector: DataCollector object to collect data for analyzing simulation
         grid: grid of environment
-        schedule: schedule for updating model to next time frame
         N_customers (int): total number of customers
         n_exposed (int): amount of customers EXPOSED to INFECTED
+        schedule: schedule for updating model to next time frame
+        vaccination_prop (float between 0 and 1): proportion of customers that is vaccinated
 
     """
-
-    def __init__(self, N_customers=20, width=20, height=20):
+    def __init__(self, N_customers=20, width=20, height=20, vaccination_prop=0):
 
         # init basic properties
-        self.n_exposed = 0
+        self.vaccination_prop = vaccination_prop
         self.grid = MultiGrid(width, height, torus=False)
+        self.n_exposed = 0
         self.schedule = RandomActivation(self)
         self.running = True     # needed to keep simulation running
 
@@ -39,7 +42,7 @@ class CovidModel(Model):
         # Start adding customers
         self.N_customers = 0
         for i in range(N_customers):
-            self.new_customer(agent.Customer)
+            self.new_customer()
 
     def is_occupied(self, pos):
         """Check if a cell or region around a cell is occupied (pos)"""
@@ -52,7 +55,7 @@ class CovidModel(Model):
         neighbors_pos = [x.pos for x in self.grid.get_neighbors(pos, moore, radius=radius)]
         return list([x for x in neighborhood if x not in neighbors_pos])
 
-    def new_customer(self, agent_object):
+    def new_customer(self):
         """Adds a new agent to a random location on the grid. Returns the created agent"""
         pos = self.get_free_pos()
 
@@ -60,7 +63,14 @@ class CovidModel(Model):
         seir = self.random.choice([Seir.SUSCEPTIBLE, Seir.INFECTED, Seir.RECOVERED])
         if seir == Seir.EXPOSED:
             self.n_exposed += 1
-        new_agent = agent_object(self.N_customers, self , pos, seir)
+
+        # vaccinate this customer according to proportion vaccinated of population
+        if self.vaccination_prop > self.random.random():
+            vaccinated = True
+        else:
+            vaccinated = False
+
+        new_agent = agent.Customer(self.N_customers, self , pos, seir, vaccinated)
 
         # add agent to a cell
         self.grid.place_agent(new_agent, pos)
