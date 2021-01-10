@@ -30,12 +30,17 @@ def agent_portrayal(agent):
     return portrayal
 
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
-width, height = 20, 20
+width, height = 50, 50
 grid = CanvasGrid(agent_portrayal, width, height, 500, 500)
 
-chart = ChartModule([{"Label": "n_exposed", "Color": "Black"}], data_collector_name="datacollector")
+# issue: all data start at (0, 0), eventhough at t=0, n_susceptibles > 0
+chart = ChartModule(
+    [{"Label": "n_susceptibles", "Color": "Blue"}, {"Label": "n_exposed", "Color": "Black"}],
+    data_collector_name="datacollector"
+)
+
 # Create the server, and pass the grid and the graph
-N_customers = 50
+N_customers = 100
 server = ModularServer(model.CovidModel,
                        [grid, chart],
                        "Indoor Covid model",

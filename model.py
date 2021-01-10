@@ -19,7 +19,8 @@ class CovidModel(Model):
         datacollector: DataCollector object to collect data for analyzing simulation
         grid: grid of environment
         N_customers (int): total number of customers
-        n_exposed (int): amount of customers EXPOSED to INFECTED
+        n_exposed (int): amount of customers EXPOSED
+        n_susceptibles (int): amount of customers SUSCEPTIBLE
         schedule: schedule for updating model to next time frame
         vaccination_prop (float between 0 and 1): proportion of customers that is vaccinated
 
@@ -30,19 +31,20 @@ class CovidModel(Model):
         self.vaccination_prop = vaccination_prop
         self.grid = MultiGrid(width, height, torus=False)
         self.n_exposed = 0
+        self.n_susceptibles = 0
         self.schedule = RandomActivation(self)
         self.running = True     # needed to keep simulation running
 
-        # datacollection
-        self.datacollector = DataCollector(
-            model_reporters={"n_exposed": "n_exposed"},
-            agent_reporters={"seir_status": "seir"}
-        )
-
-        # Start adding customers
+        # start adding customers
         self.N_customers = 0
         for i in range(N_customers):
             self.new_customer()
+
+        # datacollection
+        self.datacollector = DataCollector(
+            model_reporters={"n_exposed": "n_exposed", "n_susceptibles": "n_susceptibles"},
+            agent_reporters={"seir_status": "seir"}
+        )
 
     def is_occupied(self, pos):
         """Check if a cell or region around a cell is occupied (pos)"""
@@ -63,6 +65,8 @@ class CovidModel(Model):
         seir = self.random.choice([Seir.SUSCEPTIBLE, Seir.INFECTED, Seir.RECOVERED])
         if seir == Seir.EXPOSED:
             self.n_exposed += 1
+        elif seir == Seir.SUSCEPTIBLE:
+            self.n_susceptibles += 1
 
         # vaccinate this customer according to proportion vaccinated of population
         if self.vaccination_prop > self.random.random():
@@ -82,7 +86,7 @@ class CovidModel(Model):
     def get_free_pos(self):
         """Find free position on grid. If there are none left, exit program"""
         if not self.grid.empties:
-            print("Error! No empty cells found!")
+            print("Error! No empty cells found! Lower the amount of agents or enlarge the grid")
             exit(-1)
         x, y = self.random.choice(list(self.grid.empties))
         if not self.is_occupied((x, y)):
@@ -95,5 +99,5 @@ class CovidModel(Model):
 
     def step(self):
         """Progress simulation by one step """
-        self.datacollector.collect(self)
         self.schedule.step()
+        self.datacollector.collect(self)

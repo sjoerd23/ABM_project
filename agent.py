@@ -44,11 +44,13 @@ class Customer(Agent):
                 if neighbor.seir == Seir.SUSCEPTIBLE:
                     neighbor.seir = Seir.EXPOSED
                     self.model.n_exposed += 1
+                    self.model.n_susceptibles -= 1
         elif self.seir == Seir.SUSCEPTIBLE:
             for neighbor in neighbors:
                 if neighbor.seir == Seir.INFECTED:
                     self.seir = Seir.EXPOSED
                     self.model.n_exposed += 1
+                    self.model.n_susceptibles -= 1
                     return
 
     def move_keep_distance(self, moore=False):
