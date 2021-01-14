@@ -54,12 +54,6 @@ class CovidModel(Model):
         cell = self.grid.get_cell_list_contents([pos])
         return len(cell) > 0
 
-    def get_unoccupied(self, pos, radius, moore):
-        """Returns the unoccupied cells in region around a cell"""
-        neighborhood = self.grid.get_neighborhood(pos, moore, radius=radius)
-        neighbors_pos = [x.pos for x in self.grid.get_neighbors(pos, moore, radius=radius)]
-        return list([x for x in neighborhood if x not in neighbors_pos])
-
     def new_customer(self):
         """Adds a new agent to a random location on the grid. Returns the created agent"""
         pos = self.get_free_pos()
