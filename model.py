@@ -2,6 +2,7 @@ from mesa import Model
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
 from mesa.datacollection import DataCollector
+from space import *
 
 import agent
 from seir import Seir
@@ -25,11 +26,13 @@ class CovidModel(Model):
         vaccination_prop (float between 0 and 1): proportion of customers that is vaccinated
 
     """
-    def __init__(self, N_customers=20, width=20, height=20, vaccination_prop=0):
+    def __init__(self, N_customers=20, width=20, height=20, vaccination_prop=0, avoid_radius=3):
 
         # init basic properties
         self.vaccination_prop = vaccination_prop
-        self.grid = MultiGrid(width, height, torus=False)
+        self.avoid_radius = avoid_radius
+
+        self.grid = SuperMarketGrid(width, height, self.avoid_radius)
         self.n_exposed = 0
         self.n_susceptibles = 0
         self.schedule = RandomActivation(self)

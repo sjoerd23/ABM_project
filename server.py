@@ -1,10 +1,38 @@
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import ChartModule
+from collections import defaultdict
 
 import model
 from agent import Customer
 from seir import Seir
+
+class CanvasGrid2(CanvasGrid):
+    """Overides the default canvas grid to also handle empty cells"""
+    def __init__(self, portrayal_method, grid_width, grid_height, canvas_width=500, canvas_height=500):
+        super().__init__(portrayal_method, grid_width, grid_height, canvas_width, canvas_height)
+
+    def render(self, model):
+
+        grid_state = defaultdict(list)
+        for x in range(model.grid.width):
+            for y in range(model.grid.height):
+                cell_objects = model.grid.get_cell_list_contents([(x, y)])
+                score = model.grid.get_score((x, y))
+                if not cell_objects:
+
+                    portrayal = {"Shape": "circle", "Color": "white", "Filled": "true", "Layer": 0, "r": 0.5, "text": score,
+                           "text_color": "white", "x": x, "y": y}
+                    grid_state[portrayal["Layer"]].append(portrayal)
+                for obj in cell_objects:
+                    portrayal = self.portrayal_method(obj)
+                    if portrayal:
+                        portrayal["x"] = x
+                        portrayal["y"] = y
+                        portrayal["text"] = score
+                        grid_state[portrayal["Layer"]].append(portrayal)
+
+        return grid_state
 
 
 def agent_portrayal(agent):
@@ -31,7 +59,7 @@ def agent_portrayal(agent):
 
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
 width, height = 50, 50
-grid = CanvasGrid(agent_portrayal, width, height, 500, 500)
+grid = CanvasGrid2(agent_portrayal, width, height, 500, 500)
 
 # issue: all data start at (0, 0), eventhough at t=0, n_susceptibles > 0
 chart = ChartModule(
