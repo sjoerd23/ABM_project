@@ -117,7 +117,7 @@ class CovidModel_2(Model):
 # with open("supermarket.csv", newline = "") as file:
 #    reader = csv.reader(file)
 
-    def __init__(self, N_customers=2, width= 20, height = 20, vaccination_prop=0, avoid_radius=3):
+    def __init__(self, N_customers=2, width= 60, height = 80, vaccination_prop=0, avoid_radius=3):
 
         # init basic properties
         self.vaccination_prop = vaccination_prop
@@ -143,9 +143,11 @@ class CovidModel_2(Model):
                for i in range(grid_len):
                    grid[i].insert(0, row[i])
 
-        self.height = len(grid[0])
-        self.width = len(grid)
-        self.grid = SuperMarketGrid(width, height, self.avoid_radius)
+        # self.height = len(grid[0])
+        # self.width = len(grid)
+        self.height = height
+        self.width = width
+        self.grid = SuperMarketGrid(self.width, self.height, self.avoid_radius)
 
         # start adding obstacles
 
