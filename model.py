@@ -143,14 +143,12 @@ class CovidModel_2(Model):
                for i in range(grid_len):
                    grid[i].insert(0, row[i])
 
-        # self.height = len(grid[0])
-        # self.width = len(grid)
-        self.height = height
-        self.width = width
+
+        self.height = len(grid[0])
+        self.width = len(grid)
         self.grid = SuperMarketGrid(self.width, self.height, self.avoid_radius)
 
         # start adding obstacles
-
         counter = 0
         for i in range(self.width):
             for j in range(self.height):
