@@ -4,7 +4,7 @@ from mesa.visualization.modules import ChartModule
 from collections import defaultdict
 
 import model
-from agent import Customer
+from agent import Customer, Obstacle
 from seir import Seir
 
 class CanvasGrid2(CanvasGrid):
