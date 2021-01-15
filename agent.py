@@ -54,6 +54,7 @@ class Customer(Agent):
                         self.model.n_exposed += 1
                         self.model.n_susceptibles -= 1
                         return
+                        
     def move_keep_distance(self, moore=False):
         """Moves the agent to a random new location on the grid while trying to keep distance to
         the other agents. If other agents occupies all surrounding cell, this agents will not move
