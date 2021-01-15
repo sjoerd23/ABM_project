@@ -117,10 +117,11 @@ class CovidModel_2(Model):
 # with open("supermarket.csv", newline = "") as file:
 #    reader = csv.reader(file)
 
-    def __init__(self, N_customers=2, width= 20, height = 20, vaccination_prop=0):
+    def __init__(self, N_customers=2, width= 20, height = 20, vaccination_prop=0, avoid_radius=3):
 
         # init basic properties
         self.vaccination_prop = vaccination_prop
+        self.avoid_radius = avoid_radius
 
         self.n_exposed = 0
         self.n_susceptibles = 0
