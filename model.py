@@ -144,7 +144,7 @@ class CovidModel_2(Model):
 
         self.height = len(grid[0])
         self.width = len(grid)
-        self.grid = MultiGrid(self.width, self.height, torus=False)
+        self.grid = SuperMarketGrid(width, height, self.avoid_radius)
 
         # start adding obstacles
 
