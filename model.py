@@ -49,6 +49,12 @@ class CovidModel(Model):
             agent_reporters={"seir_status": "seir"}
         )
 
+    def get_unoccupied(self, pos, radius, moore):
+        """Returns the unoccupied cells in region around a cell"""
+        neighborhood = self.grid.get_neighborhood(pos, moore, radius=radius)
+        neighbors_pos = [x.pos for x in self.grid.get_neighbors(pos, moore, radius=radius)]
+        return list([x for x in neighborhood if x not in neighbors_pos])
+
     def is_occupied(self, pos):
         """Check if a cell or region around a cell is occupied (pos)"""
         cell = self.grid.get_cell_list_contents([pos])
