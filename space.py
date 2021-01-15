@@ -37,7 +37,6 @@ class SuperMarketGrid(MultiGrid):
 		affected_cells = self.get_neighborhood(pos, moore=False, include_center=True, radius=self.avoid_radius)
 		for cell in affected_cells:
 			score = self.avoid_radius - self.get_distance(pos, cell) + self.get_score(cell)
-			print(self.avoid_radius, self.get_distance(pos, cell), self.get_score(cell))
 
 			self.set_score(cell, score)
 
