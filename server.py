@@ -66,7 +66,7 @@ def agent_portrayal(agent):
     return portrayal
 
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
-width, height = 80, 80
+width, height = 84, 60
 grid = CanvasGrid2(agent_portrayal, width, height, 500, 500)
 
 # issue: all data start at (0, 0), eventhough at t=0, n_susceptibles > 0
