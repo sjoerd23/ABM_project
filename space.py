@@ -6,7 +6,6 @@ from typing import Tuple
 Coordinate = Tuple[int, int]
 
 
-
 class SuperMarketGrid(MultiGrid):
 	"""A MESA MultiGrid with extra options. Each cell contains a score value depending on how close customers are"""
 
@@ -15,7 +14,6 @@ class SuperMarketGrid(MultiGrid):
 		self.default_score = default_score
 		super().__init__(width, height, torus)
 		self.scores = {}
-
 
 	def set_score(self, pos, score):
 		"""Assigns a new score value to a grid position. Private function, scores should be handled internally"""
@@ -46,7 +44,7 @@ class SuperMarketGrid(MultiGrid):
 	def _remove_agent_score(self, pos):
 		affected_cells = self.get_neighborhood(pos, moore=False, include_center=True, radius=self.avoid_radius)
 		for cell in affected_cells:
-			score = - self.avoid_radius + self.get_distance(pos, cell) - self.get_score(cell)
+			score = - self.avoid_radius + self.get_distance(pos, cell) + self.get_score(cell)
 			print(self.avoid_radius, self.get_distance(pos, cell), self.get_score(cell))
 
 			self.set_score(cell, score)
