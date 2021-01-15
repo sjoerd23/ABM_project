@@ -36,15 +36,19 @@ class SuperMarketGrid(MultiGrid):
 		return abs(a - c) + abs(b - d)
 
 	def _add_agent_score(self, pos):
-		affected_cells = self.get_neighborhood(pos, moore=False, include_center=True, radius = self.avoid_radius)
+		affected_cells = self.get_neighborhood(pos, moore=False, include_center=True, radius=self.avoid_radius)
 		for cell in affected_cells:
-			score = self.get_score(pos) - self.avoid_radius + self.get_distance(pos, cell)
+			score = self.avoid_radius - self.get_distance(pos, cell) + self.get_score(cell)
+			print(self.avoid_radius, self.get_distance(pos, cell), self.get_score(cell))
+
 			self.set_score(cell, score)
 
 	def _remove_agent_score(self, pos):
 		affected_cells = self.get_neighborhood(pos, moore=False, include_center=True, radius=self.avoid_radius)
 		for cell in affected_cells:
-			score = self.avoid_radius - self.get_distance(pos, cell) + self.get_score(cell)
+			score = - self.avoid_radius + self.get_distance(pos, cell) - self.get_score(cell)
+			print(self.avoid_radius, self.get_distance(pos, cell), self.get_score(cell))
+
 			self.set_score(cell, score)
 
 	def place_agent(self, agent: Agent, pos: Coordinate):
