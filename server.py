@@ -54,11 +54,19 @@ def agent_portrayal(agent):
              portrayal["Color"] = "red"
         elif agent.seir == Seir.RECOVERED:
              portrayal["Color"] = "black"
-
+    elif type(agent) == Obstacle:
+        portrayal = {"Shape": "rect",
+                     "Color": "black",
+                     "Filled": "true",
+                     "Layer": 0,
+                     "w": 1,
+                     "h": 1,
+                     "text": agent.type_id,
+                     "text_color": "white"}
     return portrayal
 
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
-width, height = 50, 50
+width, height = 80, 80
 grid = CanvasGrid2(agent_portrayal, width, height, 500, 500)
 
 # issue: all data start at (0, 0), eventhough at t=0, n_susceptibles > 0
@@ -69,7 +77,7 @@ chart = ChartModule(
 
 # Create the server, and pass the grid and the graph
 N_customers = 100
-server = ModularServer(model.CovidModel,
+server = ModularServer(model.CovidModel_2,
                        [grid, chart],
                        "Indoor Covid model",
                        {"N_customers": N_customers, "width": width, "height": height})

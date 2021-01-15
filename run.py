@@ -13,7 +13,7 @@ run_server = True
 if run_server:
     server.launch()
 else:
-    width, height = 40, 40
+    width, height = 80, 80
     N_customers = 100
     n_steps = 200
 
