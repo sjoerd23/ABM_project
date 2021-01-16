@@ -31,6 +31,7 @@ class CovidModel(Model):
         self.N_customers = N_customers
         self.vaccination_prop = vaccination_prop
         self.avoid_radius = avoid_radius
+        self.n_problematic_contacts = 0
 
         self.schedule = RandomActivation(self)
         self.running = True     # needed to keep simulation running
@@ -53,7 +54,7 @@ class CovidModel(Model):
 
         # datacollection
         self.datacollector = DataCollector(
-            model_reporters={},
+            model_reporters={"n_problematic_contacts": "n_problematic_contacts"},
             agent_reporters={}
         )
 
@@ -130,5 +131,7 @@ class CovidModel(Model):
 
     def step(self):
         """Progress simulation by one step """
+        self.grid.n_problematic_contacts = 0
         self.schedule.step()
+        self.n_problematic_contacts = self.grid.n_problematic_contacts # used for datacollector
         self.datacollector.collect(self)

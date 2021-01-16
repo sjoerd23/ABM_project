@@ -1,6 +1,5 @@
-from mesa.visualization.modules import CanvasGrid
+from mesa.visualization.modules import CanvasGrid, ChartModule
 from mesa.visualization.ModularVisualization import ModularServer
-from mesa.visualization.modules import ChartModule
 from mesa.visualization.UserParam import UserSettableParameter
 from collections import defaultdict
 
@@ -60,10 +59,10 @@ grid = CanvasGrid2(agent_portrayal, width, height, 800, 600)
 
 # no chart for the moment. Just leaving it here, because then it will be easy to make a new chart
 # for different variables
-# chart = ChartModule(
-#     [{"Label": "n_susceptibles", "Color": "Blue"}, {"Label": "n_exposed", "Color": "Black"}],
-#     data_collector_name="datacollector"
-# )
+chart = ChartModule(
+    [{"Label": "n_problematic_contacts", "Color": "Blue"}],
+    data_collector_name="datacollector"
+)
 
 # Create the server, and pass the grid and the graph
 N_customers = 100
@@ -72,7 +71,7 @@ customer_slider = UserSettableParameter(
 )
 
 server = ModularServer(model.CovidModel,
-                       [grid],
+                       [grid, chart],
                        "Supermarket Covid Model",
                        {"N_customers": customer_slider, "width": width, "height": height})
 
