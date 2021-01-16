@@ -22,7 +22,7 @@ class CanvasGrid2(CanvasGrid):
                 if not cell_objects:
 
                     portrayal = {"Shape": "square", "Color": "white", "Filled": "true", "Layer": 0,
-                                 "r": 0.5, "text": score, "text_color": "white", "x": x, "y": y}
+                                 "r": 0.5, "text": score, "text_color": "black", "x": x, "y": y}
                     grid_state[portrayal["Layer"]].append(portrayal)
                 for obj in cell_objects:
                     portrayal = self.portrayal_method(obj)

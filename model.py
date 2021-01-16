@@ -3,7 +3,6 @@ from mesa.space import MultiGrid
 from mesa.time import RandomActivation
 from mesa.datacollection import DataCollector
 import csv
-
 import agent
 from space import SuperMarketGrid
 
