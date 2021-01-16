@@ -14,7 +14,6 @@ class CanvasGrid2(CanvasGrid):
         super().__init__(portrayal_method, grid_width, grid_height, canvas_width, canvas_height)
 
     def render(self, model):
-
         grid_state = defaultdict(list)
         for x in range(model.grid.width):
             for y in range(model.grid.height):
@@ -31,7 +30,6 @@ class CanvasGrid2(CanvasGrid):
                         portrayal["x"] = x
                         portrayal["y"] = y
                         grid_state[portrayal["Layer"]].append(portrayal)
-
         return grid_state
 
 
