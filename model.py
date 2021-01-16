@@ -2,7 +2,7 @@ from mesa import Model
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
 from mesa.datacollection import DataCollector
-from space import *
+from space import SuperMarketGrid
 import csv
 import agent
 
@@ -36,8 +36,31 @@ class CovidModel(Model):
         self.running = True     # needed to keep simulation running
 
         # start adding obstacles
+        floorplan = self.load_floorplan("data/albert.csv")
+        self.height = len(floorplan[0])
+        self.width = len(floorplan)
+        self.grid = SuperMarketGrid(self.width, self.height, self.avoid_radius)
+
+        # start adding obstacles to grid
+        for i in range(self.width):
+            for j in range(self.height):
+                if int(floorplan[i][j]) != 0:
+                    self.new_obstacle((i, j), floorplan[i][j])
+
+        # start adding customers
+        for i in range(N_customers):
+            self.new_customer()
+
+        # datacollection
+        self.datacollector = DataCollector(
+            model_reporters={},
+            agent_reporters={}
+        )
+
+    def load_floorplan(self, map):
+        """Load the floorplan of a supermarket layout specified in map"""
         grid = []
-        with open("data/albert.csv", encoding='utf-8-sig', newline="") as file:
+        with open(map, encoding='utf-8-sig', newline="") as file:
             reader = csv.reader(file)
 
             # create a list for each possible x value in the grid
@@ -49,28 +72,7 @@ class CovidModel(Model):
             for row in reader:
                 for i in range(grid_len):
                     grid[i].insert(0, row[i])
-
-        self.height = len(grid[0])
-        self.width = len(grid)
-        self.grid = SuperMarketGrid(self.width, self.height, self.avoid_radius)
-
-        # start adding obstacles
-        counter = 0
-        for i in range(self.width):
-            for j in range(self.height):
-                if int(grid[i][j]) != 0:
-                    counter += 1
-                    self.new_obstacle((i, j), grid[i][j])
-
-        # start adding customers
-        for i in range(N_customers):
-            self.new_customer()
-
-        # datacollection
-        self.datacollector = DataCollector(
-            model_reporters={},
-            agent_reporters={}
-        )
+        return grid
 
     def is_occupied(self, pos):
         """Check if a cell or region around a cell is occupied (pos)"""
