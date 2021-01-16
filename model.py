@@ -2,9 +2,10 @@ from mesa import Model
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
 from mesa.datacollection import DataCollector
-from space import SuperMarketGrid
 import csv
+
 import agent
+from space import SuperMarketGrid
 
 
 class CovidModel(Model):

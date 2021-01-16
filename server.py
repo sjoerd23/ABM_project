@@ -1,6 +1,7 @@
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import ChartModule
+from mesa.visualization.UserParam import UserSettableParameter
 from collections import defaultdict
 
 import model
@@ -67,11 +68,15 @@ grid = CanvasGrid2(agent_portrayal, width, height, 800, 600)
 # )
 
 # Create the server, and pass the grid and the graph
-N_customers = 10
+N_customers = 100
+customer_slider = UserSettableParameter(
+    'slider', 'Number of customers', value=100, min_value=1, max_value=500, step=1
+)
+
 server = ModularServer(model.CovidModel,
                        [grid],
                        "Supermarket Covid Model",
-                       {"N_customers": N_customers, "width": width, "height": height})
+                       {"N_customers": customer_slider, "width": width, "height": height})
 
 server.port = 8521
 
