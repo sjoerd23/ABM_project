@@ -6,8 +6,6 @@ from space import *
 import csv
 import agent
 
-from seir import Seir
-
 
 class CovidModel(Model):
     """Model of agents (Customers) in a store with obstacles
@@ -21,12 +19,11 @@ class CovidModel(Model):
         datacollector: DataCollector object to collect data for analyzing simulation
         grid: grid of environment
         N_customers (int): total number of customers
-        n_exposed (int): amount of customers EXPOSED
-        n_susceptibles (int): amount of customers SUSCEPTIBLE
         schedule: schedule for updating model to next time frame
         vaccination_prop (float between 0 and 1): proportion of customers that is vaccinated
-
     """
+    description = "Supermarket Covid Model"
+
     def __init__(self, N_customers=2, width=60, height=80, vaccination_prop=0, avoid_radius=3):
         super().__init__()
 
@@ -35,8 +32,6 @@ class CovidModel(Model):
         self.vaccination_prop = vaccination_prop
         self.avoid_radius = avoid_radius
 
-        self.n_exposed = 0
-        self.n_susceptibles = 0
         self.schedule = RandomActivation(self)
         self.running = True     # needed to keep simulation running
 
@@ -73,8 +68,8 @@ class CovidModel(Model):
 
         # datacollection
         self.datacollector = DataCollector(
-            model_reporters={"n_exposed": "n_exposed", "n_susceptibles": "n_susceptibles"},
-            agent_reporters={"seir_status": "seir"}
+            model_reporters={},
+            agent_reporters={}
         )
 
     def is_occupied(self, pos):
@@ -92,20 +87,13 @@ class CovidModel(Model):
         """Adds a new agent to a random location on the grid. Returns the created agent"""
         pos = self.get_free_pos()
 
-        # select random seir status for customer
-        seir = self.random.choice([Seir.SUSCEPTIBLE, Seir.INFECTED, Seir.RECOVERED])
-        if seir == Seir.EXPOSED:
-            self.n_exposed += 1
-        elif seir == Seir.SUSCEPTIBLE:
-            self.n_susceptibles += 1
-
         # vaccinate this customer according to proportion vaccinated of population
         if self.vaccination_prop > self.random.random():
             vaccinated = True
         else:
             vaccinated = False
 
-        new_agent = agent.Customer(self.next_id(), self, pos, seir, vaccinated)
+        new_agent = agent.Customer(self.next_id(), self, pos, vaccinated)
 
         # add agent to a cell
         self.grid.place_agent(new_agent, pos)

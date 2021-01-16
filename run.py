@@ -3,7 +3,6 @@ import numpy as np
 import time
 import model
 from server import server
-from seir import Seir
 
 # set to true if you want to run the model through a server with visualisation. Run with: mesa runserver
 # set to false if you don't want to run the server and like to analyze the data instead. Run with: python run.py
@@ -12,6 +11,10 @@ run_server = True
 if run_server:
     server.launch()
 else:
+
+    # deprecated code, does not work for the moment. Maybe move thise analyzing outside the
+    # vizualization to a Jupyter Notebook? Also nice for interactive purposes for possible users
+    # (see grading scheme)
     width, height = 80, 80
     N_customers = 100
     n_steps = 200

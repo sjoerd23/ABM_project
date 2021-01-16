@@ -5,7 +5,6 @@ from collections import defaultdict
 
 import model
 from agent import Customer, Obstacle
-from seir import Seir
 
 
 class CanvasGrid2(CanvasGrid):
@@ -39,21 +38,12 @@ def agent_portrayal(agent):
     portrayal = {}
     if type(agent) == Customer:
         portrayal = {"Shape": "circle",
-                     "Color": "blue",
+                     "Color": "red",
                      "Filled": "true",
-                     "Layer": 0,
-                     "r": 0.5,
-                     "text": agent.unique_id,
+                     "Layer":   0,
+                     "r": 0.9,
                      "text_color": "white"}
 
-        if agent.seir == Seir.SUSCEPTIBLE:
-            portrayal["Color"] = "green"
-        elif agent.seir == Seir.EXPOSED:
-            portrayal["Color"] = "yellow"
-        elif agent.seir == Seir.INFECTED:
-            portrayal["Color"] = "red"
-        elif agent.seir == Seir.RECOVERED:
-            portrayal["Color"] = "black"
     elif type(agent) == Obstacle:
         portrayal = {"Shape": "rect",
                      "Color": "black",
@@ -67,19 +57,20 @@ def agent_portrayal(agent):
 
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
 width, height = 84, 60
-grid = CanvasGrid2(agent_portrayal, width, height, 750, 500)
+grid = CanvasGrid2(agent_portrayal, width, height, 800, 600)
 
-# issue: all data start at (0, 0), eventhough at t=0, n_susceptibles > 0
-chart = ChartModule(
-    [{"Label": "n_susceptibles", "Color": "Blue"}, {"Label": "n_exposed", "Color": "Black"}],
-    data_collector_name="datacollector"
-)
+# no chart for the moment. Just leaving it here, because then it will be easy to make a new chart
+# for different variables
+# chart = ChartModule(
+#     [{"Label": "n_susceptibles", "Color": "Blue"}, {"Label": "n_exposed", "Color": "Black"}],
+#     data_collector_name="datacollector"
+# )
 
 # Create the server, and pass the grid and the graph
-N_customers = 100
+N_customers = 10
 server = ModularServer(model.CovidModel,
                        [grid],
-                       "Indoor Covid model",
+                       "Supermarket Covid Model",
                        {"N_customers": N_customers, "width": width, "height": height})
 
 server.port = 8521
