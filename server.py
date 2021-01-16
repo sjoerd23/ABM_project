@@ -7,6 +7,7 @@ import model
 from agent import Customer, Obstacle
 from seir import Seir
 
+
 class CanvasGrid2(CanvasGrid):
     """Overides the default canvas grid to also handle empty cells"""
     def __init__(self, portrayal_method, grid_width, grid_height, canvas_width=500, canvas_height=500):
@@ -21,15 +22,14 @@ class CanvasGrid2(CanvasGrid):
                 score = model.grid.get_score((x, y))
                 if not cell_objects:
 
-                    portrayal = {"Shape": "circle", "Color": "white", "Filled": "true", "Layer": 0, "r": 0.5, "text": score,
-                           "text_color": "white", "x": x, "y": y}
+                    portrayal = {"Shape": "square", "Color": "white", "Filled": "true", "Layer": 0,
+                                 "r": 0.5, "text": score, "text_color": "white", "x": x, "y": y}
                     grid_state[portrayal["Layer"]].append(portrayal)
                 for obj in cell_objects:
                     portrayal = self.portrayal_method(obj)
                     if portrayal:
                         portrayal["x"] = x
                         portrayal["y"] = y
-                        portrayal["text"] = score
                         grid_state[portrayal["Layer"]].append(portrayal)
 
         return grid_state
@@ -47,13 +47,13 @@ def agent_portrayal(agent):
                      "text_color": "white"}
 
         if agent.seir == Seir.SUSCEPTIBLE:
-             portrayal["Color"] = "green"
+            portrayal["Color"] = "green"
         elif agent.seir == Seir.EXPOSED:
-             portrayal["Color"] = "yellow"
+            portrayal["Color"] = "yellow"
         elif agent.seir == Seir.INFECTED:
-             portrayal["Color"] = "red"
+            portrayal["Color"] = "red"
         elif agent.seir == Seir.RECOVERED:
-             portrayal["Color"] = "black"
+            portrayal["Color"] = "black"
     elif type(agent) == Obstacle:
         portrayal = {"Shape": "rect",
                      "Color": "black",
@@ -61,13 +61,13 @@ def agent_portrayal(agent):
                      "Layer": 0,
                      "w": 1,
                      "h": 1,
-                     "text": agent.type_id,
                      "text_color": "white"}
     return portrayal
 
+
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
 width, height = 84, 60
-grid = CanvasGrid2(agent_portrayal, width, height, 500, 500)
+grid = CanvasGrid2(agent_portrayal, width, height, 750, 500)
 
 # issue: all data start at (0, 0), eventhough at t=0, n_susceptibles > 0
 chart = ChartModule(
@@ -77,8 +77,8 @@ chart = ChartModule(
 
 # Create the server, and pass the grid and the graph
 N_customers = 100
-server = ModularServer(model.CovidModel_2,
-                       [grid, chart],
+server = ModularServer(model.CovidModel,
+                       [grid],
                        "Indoor Covid model",
                        {"N_customers": N_customers, "width": width, "height": height})
 

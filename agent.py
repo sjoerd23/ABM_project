@@ -19,9 +19,9 @@ class Customer(Agent):
         vaccinated (bool): if the customer is vaccinated or not
 
     """
-
     def __init__(self, unique_id, model, pos, seir, vaccinated, radius=1):
         super().__init__(unique_id, model)
+
         self.pos = pos
         self.radius = radius
         self.seir = seir
@@ -54,7 +54,7 @@ class Customer(Agent):
                         self.model.n_exposed += 1
                         self.model.n_susceptibles -= 1
                         return
-                        
+
     def move_keep_distance(self, moore=False):
         """Moves the agent to a random new location on the grid while trying to keep distance to
         the other agents. If other agents occupies all surrounding cell, this agents will not move
@@ -80,23 +80,22 @@ class Customer(Agent):
         self.spread_covid()
 
 
-
 class Obstacle(Agent):
     """
     Agent that describes inaccesible area or shop shelf in supermarket
 
     Args:
         unique_id (int): a unique identifier for this agent
+        type_id (int): id to identify type of shelf (products on shelf)
         model: model object this agent is part of
         pos (x, y): positon of agent on grid
 
     Attributes:
         pos (x, y): positon of agent on grid
-        radius (int): preffered distance in grid cells to other agents
-
+        type_id (int): id to identify type of shelf (products on shelf)
     """
+    def __init__(self, unique_id, type_id, model, pos):
+        super().__init__(unique_id, model)
 
-    def __init__(self, type_id, model, pos):
-        # super().__init__(unique_id, model)
         self.pos = pos
         self.type_id = type_id
