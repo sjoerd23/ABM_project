@@ -7,6 +7,7 @@ import model
 from agent import Customer, Obstacle
 from seir import Seir
 
+
 class CanvasGrid2(CanvasGrid):
     """Overides the default canvas grid to also handle empty cells"""
     def __init__(self, portrayal_method, grid_width, grid_height, canvas_width=500, canvas_height=500):
@@ -67,7 +68,7 @@ def agent_portrayal(agent):
 
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
 width, height = 84, 60
-grid = CanvasGrid2(agent_portrayal, width, height, 500, 500)
+grid = CanvasGrid2(agent_portrayal, width, height, 500, 625)
 
 # issue: all data start at (0, 0), eventhough at t=0, n_susceptibles > 0
 chart = ChartModule(
