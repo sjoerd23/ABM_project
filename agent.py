@@ -15,9 +15,10 @@ class Customer(Agent):
         vaccinated (bool): if the customer is vaccinated or not
 
     """
-    def __init__(self, unique_id, model, pos, vaccinated):
+    def __init__(self, unique_id, model, pos, vaccinated, avoid_radius):
         super().__init__(unique_id, model)
 
+        self.avoid_radius = avoid_radius
         self.pos = pos
         self.vaccinated = True
 
@@ -28,8 +29,19 @@ class Customer(Agent):
         # get surrounding unoccupied cells in a radius
         unoccupied_cells = self.model.get_unoccupied(self.pos, 1, moore)
 
-        # randomly move to free spot if possible, else don't move
-        if unoccupied_cells:
+        # find possible cells to step to where no other customer is close
+        possible_cells = []
+        for cell in unoccupied_cells:
+            score = self.model.grid.get_score(cell)
+
+            # each agent creates a score of 2 around itself
+            if score <= 2:
+                possible_cells.append(cell)
+
+        if possible_cells:
+            new_cell = self.random.choice(possible_cells)
+            self.model.grid.move_agent(self, new_cell)
+        elif unoccupied_cells:
             new_cell = self.random.choice(unoccupied_cells)
             self.model.grid.move_agent(self, new_cell)
 

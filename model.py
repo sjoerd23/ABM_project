@@ -103,7 +103,7 @@ class CovidModel(Model):
         else:
             vaccinated = False
 
-        new_agent = Customer(self.next_id(), self, pos, vaccinated)
+        new_agent = Customer(self.next_id(), self, pos, vaccinated, self.avoid_radius)
 
         # add agent to a cell
         self.grid.place_agent(new_agent, pos)
