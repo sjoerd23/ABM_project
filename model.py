@@ -3,7 +3,9 @@ from mesa.space import MultiGrid
 from mesa.time import RandomActivation
 from mesa.datacollection import DataCollector
 import csv
-import agent
+import numpy as np
+
+from agent import Customer, Obstacle
 from space import SuperMarketGrid
 
 
@@ -21,6 +23,7 @@ class CovidModel(Model):
         N_customers (int): total number of customers
         schedule: schedule for updating model to next time frame
         vaccination_prop (float between 0 and 1): proportion of customers that is vaccinated
+        n_problematic_contacts (int): number of contacts violating distant rules
     """
     description = "Supermarket Covid Model"
 
@@ -31,7 +34,6 @@ class CovidModel(Model):
         self.N_customers = N_customers
         self.vaccination_prop = vaccination_prop
         self.avoid_radius = avoid_radius
-        self.n_problematic_contacts = 0
 
         self.schedule = RandomActivation(self)
         self.running = True     # needed to keep simulation running
@@ -49,14 +51,19 @@ class CovidModel(Model):
                     self.new_obstacle((i, j), floorplan[i][j])
 
         # start adding customers
-        for i in range(N_customers):
-            self.new_customer()
+        self.customers = [self.new_customer() for _ in range(N_customers)]
+
+        # calculate initial amount of problematic contacts
+        self.n_problematic_contacts = 0
+        self.problematic_contacts()
 
         # datacollection
         self.datacollector = DataCollector(
             model_reporters={"n_problematic_contacts": "n_problematic_contacts"},
             agent_reporters={}
         )
+
+        self.datacollector.collect(self)
 
     def load_floorplan(self, map):
         """Load the floorplan of a supermarket layout specified in map"""
@@ -96,7 +103,7 @@ class CovidModel(Model):
         else:
             vaccinated = False
 
-        new_agent = agent.Customer(self.next_id(), self, pos, vaccinated)
+        new_agent = Customer(self.next_id(), self, pos, vaccinated)
 
         # add agent to a cell
         self.grid.place_agent(new_agent, pos)
@@ -108,12 +115,24 @@ class CovidModel(Model):
         """Adds a new agent as obstacle to a random location on the grid. Returns the created 4
         agent
         """
-        new_agent = agent.Obstacle(self.next_id(), type_id, self, pos)
+        new_agent = Obstacle(self.next_id(), type_id, self, pos)
 
         # add agent to a cell
         self.grid.place_agent(new_agent, pos)
 
         return new_agent
+
+    def problematic_contacts(self):
+        """Calculates the total amount of problematic contacts """
+        self.n_problematic_contacts = 0     # reset number of problematic contacts
+        for customer in self.customers:
+            neighbors = self.grid.get_neighbors(
+                customer.pos, moore=False, include_center=False, radius=self.avoid_radius
+            )
+            self.n_problematic_contacts += np.sum([1 for neighbor in neighbors if type(neighbor) is Customer])
+
+        # divide by 2, because we count contacts double
+        self.n_problematic_contacts = self.n_problematic_contacts // 2
 
     def get_free_pos(self):
         """Find free position on grid. If there are none left, exit program"""
@@ -131,7 +150,8 @@ class CovidModel(Model):
 
     def step(self):
         """Progress simulation by one step """
-        self.grid.n_problematic_contacts = 0
         self.schedule.step()
-        self.n_problematic_contacts = self.grid.n_problematic_contacts # used for datacollector
+
+        # calculate number of problematic contacts
+        self.problematic_contacts()
         self.datacollector.collect(self)
