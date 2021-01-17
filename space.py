@@ -70,9 +70,9 @@ class SuperMarketGrid(MultiGrid):
 		if type(agent) is Customer:
 			self._remove_agent_score(pos)
 
-	def move_agent(self, agent: Agent, pos: Coordinate):
+	def move_agent(self, agent: Agent, new_pos: Coordinate):
 		if type(agent) is Customer:
-			self.get_problematic_contacts(pos)
-			self._remove_agent_score(pos)
-			self._add_agent_score(pos)
-		super().move_agent(agent, pos)
+			self.get_problematic_contacts(agent/pos)
+			self._remove_agent_score(agent.pos)
+			self._add_agent_score(new_pos)
+		super().move_agent(agent, new_pos)
