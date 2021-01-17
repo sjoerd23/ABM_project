@@ -16,14 +16,6 @@ class SuperMarketGrid(MultiGrid):
 		self.avoid_radius = avoid_radius
 		self.default_score = default_score
 		self.scores = {}
-		self.n_problematic_contacts = 0
-
-	## TODO: temporary function. Counts contacts double
-	def get_problematic_contacts(self, pos):
-		neighbors = self.get_neighbors(pos, moore=False, include_center=False, radius=self.avoid_radius)
-		for neighbor in neighbors:
-			if type(neighbor) is Customer:
-				self.n_problematic_contacts += 1
 
 	def set_score(self, pos, score):
 		"""Assigns a new score value to a grid position. Private function, scores should be handled internally"""
@@ -72,7 +64,6 @@ class SuperMarketGrid(MultiGrid):
 
 	def move_agent(self, agent: Agent, new_pos: Coordinate):
 		if type(agent) is Customer:
-			# self.get_problematic_contacts(agent.pos)
 			self._remove_agent_score(agent.pos)
 			self._add_agent_score(new_pos)
 		super().move_agent(agent, new_pos)
