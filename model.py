@@ -131,7 +131,7 @@ class CovidSupermarketModel(Model):
             self.n_problematic_contacts += np.sum([1 for neighbor in neighbors if type(neighbor) is Customer])
 
         # divide by 2, because we count contacts double
-        self.n_problematic_contacts = self.n_problematic_contacts // 2
+        self.n_problematic_contacts = int(self.n_problematic_contacts / 2)
 
     def get_free_pos(self):
         """Find free position on grid. If there are none left, exit program"""
