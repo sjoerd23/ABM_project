@@ -3,8 +3,6 @@ import numpy as np
 import time
 import model
 from server import server
-from seir import Seir
-
 
 
 # set to true if you want to run the model through a server with visualisation. Run with: mesa runserver
@@ -14,12 +12,16 @@ run_server = True
 if run_server:
     server.launch()
 else:
+
+    # deprecated code, does not work for the moment. Maybe move thise analyzing outside the
+    # vizualization to a Jupyter Notebook? Also nice for interactive purposes for possible users
+    # (see grading scheme)
     width, height = 80, 80
     N_customers = 100
     n_steps = 200
 
     time_start = time.time()
-    model = model.CovidModel(N_customers, width, height)
+    model = model.CovidSupermarketModel(N_customers, width, height)
     model.run_model(n_steps)
     time_end = time.time()
 

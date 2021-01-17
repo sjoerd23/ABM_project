@@ -3,7 +3,6 @@ from mesa.agent import Agent
 from typing import Tuple
 from agent import Customer
 
-
 # define Coordinate object just like in Mesa's Grid file
 Coordinate = Tuple[int, int]
 
@@ -12,9 +11,10 @@ class SuperMarketGrid(MultiGrid):
 	"""A MESA MultiGrid with extra options. Each cell contains a score value depending on how close customers are"""
 
 	def __init__(self, width, height, avoid_radius, default_score=0, torus=False):
+		super().__init__(width, height, torus)
+
 		self.avoid_radius = avoid_radius
 		self.default_score = default_score
-		super().__init__(width, height, torus)
 		self.scores = {}
 
 	def set_score(self, pos, score):
@@ -39,7 +39,6 @@ class SuperMarketGrid(MultiGrid):
 		affected_cells = self.get_neighborhood(pos, moore=False, include_center=True, radius=self.avoid_radius)
 		for cell in affected_cells:
 			score = self.avoid_radius - self.get_distance(pos, cell) + self.get_score(cell)
-
 			self.set_score(cell, score)
 
 	def _remove_agent_score(self, pos):
@@ -50,21 +49,21 @@ class SuperMarketGrid(MultiGrid):
 
 	def place_agent(self, agent: Agent, pos: Coordinate):
 		super().place_agent(agent, pos)
+
 		# update score
-		if type(agent) == Customer:
+		if type(agent) is Customer:
 			self._add_agent_score(pos)
 
 	def remove_agent(self, agent: Agent):
 		pos = agent.pos
 		super().remove_agent(agent)
+
 		# update score
-		if type(agent) == Customer:
+		if type(agent) is Customer:
 			self._remove_agent_score(pos)
 
-	def move_agent(self, agent: Agent, pos: Coordinate):
-		if type(agent) == Customer:
+	def move_agent(self, agent: Agent, new_pos: Coordinate):
+		if type(agent) is Customer:
 			self._remove_agent_score(agent.pos)
-			self._add_agent_score(pos)
-		super().move_agent(agent, pos)
-
-
+			self._add_agent_score(new_pos)
+		super().move_agent(agent, new_pos)

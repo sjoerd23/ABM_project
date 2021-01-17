@@ -1,5 +1,4 @@
 from mesa import Model, Agent
-from seir import Seir
 
 
 class Customer(Agent):
@@ -9,61 +8,42 @@ class Customer(Agent):
         unique_id (int): a unique identifier for this agent
         model: model object this agent is part of
         pos (x, y): positon of agent on grid
-        seir (Enum Seir): Covid infection status according to SEIR model
         vaccinated (bool): if the customer is vaccinated or not
 
     Attributes:
         pos (x, y): positon of agent on grid
-        radius (int): preffered distance in grid cells to other agents
-        seir (Enum Seir): Covid infection status according to SEIR model
         vaccinated (bool): if the customer is vaccinated or not
+        is_problematic_contact (bool): if agent is currently in avoid_radius of other agent
 
     """
-
-    def __init__(self, unique_id, model, pos, seir, vaccinated, radius=1):
+    def __init__(self, unique_id, model, pos, vaccinated, avoid_radius):
         super().__init__(unique_id, model)
+
+        self.avoid_radius = avoid_radius
         self.pos = pos
-        self.radius = radius
-        self.seir = seir
-        self.vaccinated = True
+        self.vaccinated = vaccinated
+        self.is_problematic_contact = False
 
-        # if vaccinated set self.seir to RECOVERED (i.e. assuem this agent can't get sick or transfer Covid)
-        if vaccinated:
-            # adjust total amount of EXPOSED (can be done more elegant perhaps in another way?)
-            if self.seir == Seir.EXPOSED:
-                self.model.n_exposed -= 1
-            self.seir = Seir.RECOVERED
-
-    def spread_covid(self):
-        """Spread covid to neighbors if infected, or get infected if there are any infected
-        neighbors.
-        """
-        neighbors = self.model.grid.get_neighbors(self.pos, moore=False, radius=1)
-        if self.seir == Seir.INFECTED:
-            for neighbor in neighbors:
-                if hasattr(neighbor, 'seir'):
-                    if neighbor.seir == Seir.SUSCEPTIBLE:
-                        neighbor.seir = Seir.EXPOSED
-                        self.model.n_exposed += 1
-                        self.model.n_susceptibles -= 1
-        elif self.seir == Seir.SUSCEPTIBLE:
-            for neighbor in neighbors:
-                if hasattr(neighbor, 'seir'):
-                    if neighbor.seir == Seir.INFECTED:
-                        self.seir = Seir.EXPOSED
-                        self.model.n_exposed += 1
-                        self.model.n_susceptibles -= 1
-                        return
-                        
     def move_keep_distance(self, moore=False):
         """Moves the agent to a random new location on the grid while trying to keep distance to
         the other agents. If other agents occupies all surrounding cell, this agents will not move
         """
         # get surrounding unoccupied cells in a radius
-        unoccupied_cells = self.model.get_unoccupied(self.pos, self.radius, moore)
+        unoccupied_cells = self.model.get_unoccupied(self.pos, 1, moore)
 
-        # randomly move to free spot if possible, else don't move
-        if unoccupied_cells:
+        # find possible cells to step to where no other customer is close
+        possible_cells = []
+        for cell in unoccupied_cells:
+            score = self.model.grid.get_score(cell)
+
+            # each agent creates a score of 2 around itself
+            if score <= 2:
+                possible_cells.append(cell)
+
+        if possible_cells:
+            new_cell = self.random.choice(possible_cells)
+            self.model.grid.move_agent(self, new_cell)
+        elif unoccupied_cells:
             new_cell = self.random.choice(unoccupied_cells)
             self.model.grid.move_agent(self, new_cell)
 
@@ -77,8 +57,6 @@ class Customer(Agent):
         """Progress step in time. First move. Then check neighbors if any are infected -> infect
         """
         self.move_keep_distance()
-        self.spread_covid()
-
 
 
 class Obstacle(Agent):
@@ -87,16 +65,16 @@ class Obstacle(Agent):
 
     Args:
         unique_id (int): a unique identifier for this agent
+        type_id (int): id to identify type of shelf (products on shelf)
         model: model object this agent is part of
         pos (x, y): positon of agent on grid
 
     Attributes:
         pos (x, y): positon of agent on grid
-        radius (int): preffered distance in grid cells to other agents
-
+        type_id (int): id to identify type of shelf (products on shelf)
     """
+    def __init__(self, unique_id, type_id, model, pos):
+        super().__init__(unique_id, model)
 
-    def __init__(self, type_id, model, pos):
-        # super().__init__(unique_id, model)
         self.pos = pos
         self.type_id = type_id
