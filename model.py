@@ -63,7 +63,6 @@ class CovidSupermarketModel(Model):
             model_reporters={"n_problematic_contacts": "n_problematic_contacts"},
             agent_reporters={}
         )
-
         self.datacollector.collect(self)
 
     def load_floorplan(self, map):
@@ -96,7 +95,6 @@ class CovidSupermarketModel(Model):
 
     def new_customer(self):
         """Adds a new agent to a random location on the grid. Returns the created agent"""
-        pos = self.get_free_pos()
 
         # vaccinate this customer according to proportion vaccinated of population
         if self.vaccination_prop > self.random.random():
@@ -104,9 +102,8 @@ class CovidSupermarketModel(Model):
         else:
             vaccinated = False
 
+        pos = self.get_free_pos()
         new_agent = Customer(self.next_id(), self, pos, vaccinated, self.avoid_radius)
-
-        # add agent to a cell
         self.grid.place_agent(new_agent, pos)
         self.schedule.add(new_agent)
         return new_agent
@@ -117,10 +114,7 @@ class CovidSupermarketModel(Model):
         agent
         """
         new_agent = Obstacle(self.next_id(), type_id, self, pos)
-
-        # add agent to a cell
         self.grid.place_agent(new_agent, pos)
-
         return new_agent
 
     def problematic_contacts(self):
