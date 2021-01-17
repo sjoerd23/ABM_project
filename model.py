@@ -14,7 +14,6 @@ class CovidSupermarketModel(Model):
 
     Args:
         N_customers (int): total number of customers
-        width, height (int): dimensions of grid
         vaccination_prop (float between 0 and 1): proportion of customers that is vaccinated
 
     Attributes:
@@ -27,7 +26,7 @@ class CovidSupermarketModel(Model):
     """
     description = "Supermarket Covid Model"
 
-    def __init__(self, N_customers=2, width=60, height=80, vaccination_prop=0, avoid_radius=3):
+    def __init__(self, N_customers=100, vaccination_prop=0, avoid_radius=3):
         super().__init__()
 
         # init basic properties

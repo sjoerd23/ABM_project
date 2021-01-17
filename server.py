@@ -73,7 +73,7 @@ customer_slider = UserSettableParameter(
 server = ModularServer(model.CovidSupermarketModel,
                        [grid, chart],
                        "Supermarket Covid Model",
-                       {"N_customers": customer_slider, "width": width, "height": height})
+                       {"N_customers": customer_slider})
 
 server.port = 8521
 
