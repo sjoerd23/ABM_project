@@ -24,7 +24,9 @@ class CovidSupermarketModel(Model):
         vaccination_prop (float between 0 and 1): proportion of customers that is vaccinated
         n_problematic_contacts (int): number of contacts violating distant rules
     """
-    description = "Supermarket Covid Model"
+    description = "Supermarket Covid Model.\
+    Agent color represents its status: vaccinated (green), problematic contact (red), else (blue).\
+    "
 
     def __init__(self, N_customers=100, vaccination_prop=0, avoid_radius=3):
         super().__init__()
@@ -123,12 +125,22 @@ class CovidSupermarketModel(Model):
 
     def problematic_contacts(self):
         """Calculates the total amount of problematic contacts """
-        self.n_problematic_contacts = 0     # reset number of problematic contacts
+
+        # reset variables
+        self.n_problematic_contacts = 0
         for customer in self.customers:
-            neighbors = self.grid.get_neighbors(
-                customer.pos, moore=False, include_center=False, radius=self.avoid_radius
-            )
-            self.n_problematic_contacts += np.sum([1 for neighbor in neighbors if type(neighbor) is Customer])
+            customer.is_problematic_contact = False
+
+        # count problematic contacts. If one of the agents is vaccinated, do not count as a contact
+        for customer in self.customers:
+            if not customer.vaccinated:
+                neighbors = self.grid.get_neighbors(
+                    customer.pos, moore=False, include_center=False, radius=self.avoid_radius
+                )
+                for neighbor in neighbors:
+                    if type(neighbor) is Customer and not neighbor.vaccinated:
+                        self.n_problematic_contacts += 1
+                        neighbor.is_problematic_contact = True
 
         # divide by 2, because we count contacts double
         self.n_problematic_contacts = int(self.n_problematic_contacts / 2)

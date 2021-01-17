@@ -36,11 +36,18 @@ def agent_portrayal(agent):
     portrayal = {}
     if type(agent) == Customer:
         portrayal = {"Shape": "circle",
-                     "Color": "red",
                      "Filled": "true",
+                     "color": "yellow",
                      "Layer":   0,
                      "r": 0.9,
                      "text_color": "white"}
+        if agent.vaccinated:
+            portrayal["Color"] = "green"
+        else:
+            if agent.is_problematic_contact:
+                portrayal["Color"] = "red"
+            else:
+                portrayal["Color"] = "blue"
 
     elif type(agent) == Obstacle:
         portrayal = {"Shape": "rect",
@@ -65,15 +72,17 @@ chart = ChartModule(
 )
 
 # Create the server, and pass the grid and the graph
-N_customers = 100
 customer_slider = UserSettableParameter(
     'slider', 'Number of customers', value=100, min_value=1, max_value=500, step=1
+)
+vaccinated_slider = UserSettableParameter(
+    'slider', 'Proportion of vaccinated customers', value=0.1, min_value=0, max_value=1, step=0.01
 )
 
 server = ModularServer(model.CovidSupermarketModel,
                        [grid, chart],
                        "Supermarket Covid Model",
-                       {"N_customers": customer_slider})
+                       {"N_customers": customer_slider, "vaccination_prop": vaccinated_slider})
 
 server.port = 8521
 

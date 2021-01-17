@@ -13,6 +13,7 @@ class Customer(Agent):
     Attributes:
         pos (x, y): positon of agent on grid
         vaccinated (bool): if the customer is vaccinated or not
+        is_problematic_contact (bool): if agent is currently in avoid_radius of other agent
 
     """
     def __init__(self, unique_id, model, pos, vaccinated, avoid_radius):
@@ -20,7 +21,8 @@ class Customer(Agent):
 
         self.avoid_radius = avoid_radius
         self.pos = pos
-        self.vaccinated = True
+        self.vaccinated = vaccinated
+        self.is_problematic_contact = False
 
     def move_keep_distance(self, moore=False):
         """Moves the agent to a random new location on the grid while trying to keep distance to
