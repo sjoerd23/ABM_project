@@ -20,7 +20,7 @@ else:
     n_steps = 200
 
     time_start = time.time()
-    model = model.CovidModel(N_customers, width, height)
+    model = model.CovidSupermarketModel(N_customers, width, height)
     model.run_model(n_steps)
     time_end = time.time()
 

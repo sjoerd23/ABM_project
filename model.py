@@ -9,7 +9,7 @@ from agent import Customer, Obstacle
 from space import SuperMarketGrid
 
 
-class CovidModel(Model):
+class CovidSupermarketModel(Model):
     """Model of agents (Customers) in a store with obstacles
 
     Args:

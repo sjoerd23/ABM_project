@@ -70,7 +70,7 @@ customer_slider = UserSettableParameter(
     'slider', 'Number of customers', value=100, min_value=1, max_value=500, step=1
 )
 
-server = ModularServer(model.CovidModel,
+server = ModularServer(model.CovidSupermarketModel,
                        [grid, chart],
                        "Supermarket Covid Model",
                        {"N_customers": customer_slider, "width": width, "height": height})
