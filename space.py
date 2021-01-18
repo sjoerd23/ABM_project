@@ -23,12 +23,15 @@ class SuperMarketGrid(MultiGrid):
 		"""Assigns a new score value to a grid position. Private function, scores should be handled internally"""
 		self.scores[pos] = score
 
-	def get_score(self, pos):
+	def get_score(self, *cells):
 		"""Returns the score value corresponding to the given position."""
-		if pos in self.scores:
-			return int(self.scores[pos])
-		else:
-			return int(self.default_score)
+		score = 0
+		for cell in cells:
+			if cell in self.scores:
+				score += self.scores[cell]
+			else:
+				score += self.default_score
+		return score
 
 	def _add_agent_score(self, pos):
 		affected_cells = self.get_neighborhood(pos, moore=False, include_center=True, radius=self.avoid_radius)
