@@ -9,6 +9,24 @@ from agent import Customer, Obstacle
 from space import SuperMarketGrid
 
 
+def load_floorplan(map):
+    """Load the floorplan of a supermarket layout specified in map"""
+    grid = []
+    with open(map, encoding='utf-8-sig', newline="") as file:
+        reader = csv.reader(file)
+
+        # create a list for each possible x value in the grid
+        for row in reader:
+            for item in row:
+                grid.append([item])
+            grid_len = len(grid)
+            break
+        for row in reader:
+            for i in range(grid_len):
+                grid[i].insert(0, row[i])
+    return grid
+
+
 class CovidSupermarketModel(Model):
     """Model of agents (Customers) in a store with obstacles
 
@@ -40,7 +58,7 @@ class CovidSupermarketModel(Model):
         self.running = True     # needed to keep simulation running
 
         # start adding obstacles
-        floorplan = self.load_floorplan("data/albert.csv")
+        floorplan = load_floorplan("data/albert.csv")
         self.height = len(floorplan[0])
         self.width = len(floorplan)
         self.grid = SuperMarketGrid(self.width, self.height, self.avoid_radius)
@@ -64,23 +82,6 @@ class CovidSupermarketModel(Model):
             agent_reporters={}
         )
         self.datacollector.collect(self)
-
-    def load_floorplan(self, map):
-        """Load the floorplan of a supermarket layout specified in map"""
-        grid = []
-        with open(map, encoding='utf-8-sig', newline="") as file:
-            reader = csv.reader(file)
-
-            # create a list for each possible x value in the grid
-            for row in reader:
-                for item in row:
-                    grid.append([item])
-                grid_len = len(grid)
-                break
-            for row in reader:
-                for i in range(grid_len):
-                    grid[i].insert(0, row[i])
-        return grid
 
     def is_occupied(self, pos):
         """Check if a cell or region around a cell is occupied (pos)"""
@@ -146,7 +147,7 @@ class CovidSupermarketModel(Model):
             exit(-1)
         x, y = self.random.choice(list(self.grid.empties))
         if not self.is_occupied((x, y)):
-            return (x, y)
+            return x, y
 
     def run_model(self, n_steps=200):
         """Run model for n_steps"""
