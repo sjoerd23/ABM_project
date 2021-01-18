@@ -1,4 +1,5 @@
 from mesa import Model, Agent
+import route
 
 
 class Customer(Agent):
@@ -23,6 +24,7 @@ class Customer(Agent):
         self.pos = pos
         self.vaccinated = vaccinated
         self.is_problematic_contact = False
+        self.routefinder = None
 
     def move_keep_distance(self, moore=False):
         """Moves the agent to a random new location on the grid while trying to keep distance to
@@ -56,7 +58,13 @@ class Customer(Agent):
     def step(self):
         """Progress step in time. First move. Then check neighbors if any are infected -> infect
         """
-        self.move_keep_distance()
+        if not self.routefinder:
+            self.routefinder = route.Route(self.pos, (29, 54), self.model.grid, forbidden=[Obstacle])
+
+        # check if route exists, if so move agent towards the goal
+        if self.routefinder.shortest:
+            self.model.grid.move_agent(self, self.routefinder.shortest[-1])
+            self.routefinder.shortest.pop()
 
 
 class Obstacle(Agent):

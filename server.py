@@ -22,7 +22,7 @@ class CanvasGrid2(CanvasGrid):
                 if not cell_objects:
 
                     portrayal = {"Shape": "square", "Color": "white", "Filled": "true", "Layer": 0,
-                                 "r": 0.5, "text": score, "text_color": "black", "x": x, "y": y}
+                                 "r": 0.5, "text": "({0}, {1}) - {2}".format(x, y, score), "text_color": "black", "x": x, "y": y}
                     grid_state[portrayal["Layer"]].append(portrayal)
                 for obj in cell_objects:
                     portrayal = self.portrayal_method(obj)
@@ -63,11 +63,8 @@ def agent_portrayal(agent):
 
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
 width, height = 84, 60
-<<<<<<< HEAD
-grid = CanvasGrid2(agent_portrayal, width, height, 500, 625)
-=======
+
 grid = CanvasGrid2(agent_portrayal, width, height, 800, 600)
->>>>>>> 7d977cda8c57b3d028eb5e90c6355fb151319922
 
 # no chart for the moment. Just leaving it here, because then it will be easy to make a new chart
 # for different variables
