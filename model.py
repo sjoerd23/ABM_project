@@ -4,6 +4,7 @@ from mesa.time import RandomActivation
 from mesa.datacollection import DataCollector
 import csv
 import numpy as np
+import time
 
 from agent import Customer, Obstacle
 from space import SuperMarketGrid
@@ -129,12 +130,55 @@ class CovidSupermarketModel(Model):
         for customer in self.customers:
             if not customer.vaccinated:
                 neighbors = self.grid.get_neighbors(
-                    customer.pos, moore=False, include_center=False, radius=self.avoid_radius
+                    customer.pos, moore=False, include_center=True, radius=self.avoid_radius
                 )
                 for neighbor in neighbors:
-                    if type(neighbor) is Customer and not neighbor.vaccinated:
-                        self.n_problematic_contacts += 1
-                        neighbor.is_problematic_contact = True
+                    if neighbor is not customer:
+                        # if neighbor.pos[0] == customer.pos[0] or neighbor.pos[1] == neighbor.pos[1]:
+
+                        if type(neighbor) is Customer and not neighbor.vaccinated:
+                            neighbor_x = neighbor.pos[0]
+                            neighbor_y = neighbor.pos[1]
+                            customer_x = customer.pos[0]
+                            customer_y = customer.pos[1]
+                            # dx = abs(neighbor.pos[0] - customer.pos[0])
+                            # dy = abs(neighbor.pos[1] - customer.pos[1])
+                            # print(dx, dy)
+                            if neighbor_y == customer_y:
+                                if neighbor_x < customer_x:
+                                    for x in range(neighbor_x+1, customer_x):
+                                        if Obstacle in self.grid[x][neighbor_y]:
+                                            print(self.grid[x][neighbor_y])
+                                            break
+                                    else:
+                                        self.n_problematic_contacts += 1
+                                        neighbor.is_problematic_contact = True
+                                if neighbor_x > customer_x:
+                                    for x in range(customer_x+1, neighbor_x):
+                                        if self.grid[x][neighbor_y] is Obstacle:
+                                            print(self.grid[x][neighbor_y])
+                                            break
+                                    else:
+                                        self.n_problematic_contacts += 1
+                                        neighbor.is_problematic_contact = True
+                            if neighbor_x == customer_x:
+                                if neighbor_y < customer_y:
+                                    for y in range(neighbor_y+1, customer_y):
+                                        if self.grid[neighbor_x][y] is Obstacle:
+                                            break
+                                    else:
+                                        self.n_problematic_contacts += 1
+                                        neighbor.is_problematic_contact = True
+                                if neighbor_y > customer_y:
+                                    for y in range(customer_y+1, neighbor_y):
+                                        if self.grid[neighbor_x][y] is Obstacle:
+                                            break
+                                    else:
+                                        self.n_problematic_contacts += 1
+                                        neighbor.is_problematic_contact = True
+                            else:
+                                self.n_problematic_contacts += 1
+                                neighbor.is_problematic_contact = True
 
         # divide by 2, because we count contacts double
         self.n_problematic_contacts = int(self.n_problematic_contacts / 2)
@@ -155,7 +199,9 @@ class CovidSupermarketModel(Model):
 
     def step(self):
         """Progress simulation by one step """
+        time_start = time.time()
         self.schedule.step()
+        print("Total time: {:2f}s".format(time.time()-time_start))
 
         # calculate number of problematic contacts
         self.problematic_contacts()
