@@ -2,6 +2,8 @@ from mesa.space import MultiGrid
 from mesa.agent import Agent
 from typing import Tuple
 from agent import Customer
+from core import get_distance
+
 
 # define Coordinate object just like in Mesa's Grid file
 Coordinate = Tuple[int, int]
@@ -28,23 +30,16 @@ class SuperMarketGrid(MultiGrid):
 		else:
 			return int(self.default_score)
 
-	@classmethod
-	def get_distance(cls, pos1, pos2):
-		"""Returns the Manhattan distance"""
-		(a, b) = pos1
-		(c, d) = pos2
-		return abs(a - c) + abs(b - d)
-
 	def _add_agent_score(self, pos):
 		affected_cells = self.get_neighborhood(pos, moore=False, include_center=True, radius=self.avoid_radius)
 		for cell in affected_cells:
-			score = self.avoid_radius - self.get_distance(pos, cell) + self.get_score(cell)
+			score = self.avoid_radius - get_distance(pos, cell, "manhattan") + self.get_score(cell)
 			self.set_score(cell, score)
 
 	def _remove_agent_score(self, pos):
 		affected_cells = self.get_neighborhood(pos, moore=False, include_center=True, radius=self.avoid_radius)
 		for cell in affected_cells:
-			score = - self.avoid_radius + self.get_distance(pos, cell) + self.get_score(cell)
+			score = - self.avoid_radius + get_distance(pos, cell, "manhattan") + self.get_score(cell)
 			self.set_score(cell, score)
 
 	def place_agent(self, agent: Agent, pos: Coordinate):
