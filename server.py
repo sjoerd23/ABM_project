@@ -7,7 +7,6 @@ import model
 from agent import Customer, Obstacle
 
 
-
 class CanvasGrid2(CanvasGrid):
     """Overrides the default canvas grid to also handle empty cells"""
     def __init__(self, portrayal_method, grid_width, grid_height, canvas_width=500, canvas_height=500):
