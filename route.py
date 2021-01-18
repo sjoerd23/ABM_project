@@ -53,6 +53,12 @@ class Route:
 		return possible
 
 	def find_shortest(self):
+		self.a_star()
+
+	def find_safest(self):
+		self.a_start()
+
+	def a_star(self, distance_method):
 		"""A* path finding algorithm.
 		Based on pseudocode on Wikipedia: https://en.wikipedia.org/wiki/A*_search_algorithm"""
 		start_object = Position(self.start, 0, get_distance(self.start, self.goal))
