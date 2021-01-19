@@ -157,7 +157,6 @@ class CovidSupermarketModel(Model):
                             real_pos = list([(customer.pos[0] + delta_pos[0], customer.pos[1] + delta_pos[1]) for delta_pos in delta_pos_list])
                             safe_pos += real_pos
 
-                # print(safe_pos)
                 for neighbor in neighbors:
                     if type(neighbor) is Customer:
                         if neighbor is not customer:
