@@ -1,8 +1,8 @@
 from mesa.space import MultiGrid
 from mesa.agent import Agent
 from typing import Tuple
-from agent import Customer
-from core import get_distance
+from agent import Customer, Obstacle
+import core
 
 
 # define Coordinate object just like in Mesa's Grid file
@@ -33,24 +33,51 @@ class SuperMarketGrid(MultiGrid):
 				score += self.default_score
 		return score
 
-	def _add_agent_score(self, pos):
-		affected_cells = self.get_neighborhood(pos, moore=False, include_center=True, radius=self.avoid_radius)
-		for cell in affected_cells:
-			score = self.avoid_radius - get_distance(pos, cell, "manhattan") + self.get_score(cell)
-			self.set_score(cell, score)
+	def _add_agent_score(self, agent, new_pos):
+		safe_pos = []
+		neighbors = self.get_neighbors(
+			new_pos, moore=False, include_center=True, radius=self.avoid_radius
+		)
+		for neighbor in neighbors:
+			if type(neighbor) is Obstacle:
+				delta_pos = (neighbor.pos[0] - new_pos[0], neighbor.pos[1] - new_pos[1])
+				if delta_pos in core.BARRIER_DICT:
+					delta_pos_list =  core.BARRIER_DICT[delta_pos]
+					real_pos = list([(new_pos[0] + delta_pos[0], new_pos[1] + delta_pos[1]) for delta_pos in delta_pos_list])
+					safe_pos += real_pos
 
-	def _remove_agent_score(self, pos):
+		affected_cells = self.get_neighborhood(new_pos, moore=False, include_center=True, radius=self.avoid_radius)
+		for cell in affected_cells:
+			if cell not in safe_pos:
+				score = self.avoid_radius - core.get_distance(new_pos, cell, "manhattan") + self.get_score(cell)
+				self.set_score(cell, score)
+
+	def _remove_agent_score(self, agent, pos):
+		safe_pos = []
+		neighbors = self.get_neighbors(
+			pos, moore=False, include_center=True, radius=self.avoid_radius
+		)
+		for neighbor in neighbors:
+			if type(neighbor) is Obstacle:
+				delta_pos = (neighbor.pos[0] - pos[0], neighbor.pos[1] - pos[1])
+				if delta_pos in core.BARRIER_DICT:
+					delta_pos_list = core.BARRIER_DICT[delta_pos]
+					real_pos = list([(pos[0] + delta_pos[0], pos[1] + delta_pos[1]) for delta_pos in delta_pos_list])
+					safe_pos += real_pos
+
+
 		affected_cells = self.get_neighborhood(pos, moore=False, include_center=True, radius=self.avoid_radius)
 		for cell in affected_cells:
-			score = - self.avoid_radius + get_distance(pos, cell, "manhattan") + self.get_score(cell)
-			self.set_score(cell, score)
+			if cell not in safe_pos:
+				score = - self.avoid_radius + core.get_distance(pos, cell, "manhattan") + self.get_score(cell)
+				self.set_score(cell, score)
 
 	def place_agent(self, agent: Agent, pos: Coordinate):
 		super().place_agent(agent, pos)
 
 		# update score
 		if type(agent) is Customer:
-			self._add_agent_score(pos)
+			self._add_agent_score(agent, pos)
 
 	def remove_agent(self, agent: Agent):
 		pos = agent.pos
@@ -58,10 +85,10 @@ class SuperMarketGrid(MultiGrid):
 
 		# update score
 		if type(agent) is Customer:
-			self._remove_agent_score(pos)
+			self._remove_agent_score(agent, pos)
 
 	def move_agent(self, agent: Agent, new_pos: Coordinate):
 		if type(agent) is Customer:
-			self._remove_agent_score(agent.pos)
-			self._add_agent_score(new_pos)
+			self._remove_agent_score(agent, agent.pos)
+			self._add_agent_score(agent, new_pos)
 		super().move_agent(agent, new_pos)

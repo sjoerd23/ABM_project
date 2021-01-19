@@ -47,20 +47,6 @@ class CovidSupermarketModel(Model):
     description = "Supermarket Covid Model.\
     Agent color represents its status: vaccinated (green), problematic contact (red), else (blue).\
     "
-    barrier_dict = {
-        (0, 1): [(0, 2), (0, 3), (-1, 2), (1, 2)],
-        (1, 1): [(1, 2), (2, 1)],
-        (1, 0): [(2, 1), (2, -1), (2, 0), (3, 0)],
-        (1, -1): [(2, -1), (1, -2)],
-        (0, -1): [(0, -2), (0, -3), (1, -2), (-1, -2)],
-        (-1, -1): [(-1, -2), (-2, -1)],
-        (-1, 0): [(-2, 1), (-2, -1), (-2, 0), (-3, 0)],
-        (-1, 1): [(-2, 1), (-1, 2)],
-        (0, 2): [(0, 3)],
-        (0, -2): [(0, -3)],
-        (2, 0): [(3, 0)],
-        (-2, 0): [(-3, 0)]
-    }
 
     def __init__(self, N_customers=100, vaccination_prop=0, avoid_radius=3):
         super().__init__()
@@ -152,8 +138,8 @@ class CovidSupermarketModel(Model):
                 for neighbor in neighbors:
                     if type(neighbor) is Obstacle:
                         delta_pos = (neighbor.pos[0] - customer.pos[0], neighbor.pos[1] - customer.pos[1])
-                        if delta_pos in self.barrier_dict:
-                            delta_pos_list = self.barrier_dict[delta_pos]
+                        if delta_pos in core.BARRIER_DICT:
+                            delta_pos_list = core.BARRIER_DICT[delta_pos]
                             real_pos = list([(customer.pos[0] + delta_pos[0], customer.pos[1] + delta_pos[1]) for delta_pos in delta_pos_list])
                             safe_pos += real_pos
 
