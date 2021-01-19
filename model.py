@@ -47,6 +47,20 @@ class CovidSupermarketModel(Model):
     description = "Supermarket Covid Model.\
     Agent color represents its status: vaccinated (green), problematic contact (red), else (blue).\
     "
+    barrier_dict = {
+        (0, 1): [(0, 2), (0, 3), (-1, 2), (1, 2)],
+        (1, 1): [(1, 2), (2, 1)],
+        (1, 0): [(2, 1), (2, -1), (2, 0), (3, 0)],
+        (1, -1): [(2, -1), (1, -2)],
+        (0, -1): [(0, -2), (0, -3), (1, -2), (-1, -2)],
+        (-1, -1): [(-1, -2), (-2, -1)],
+        (-1, 0): [(-2, 1), (-2, -1), (-2, 0), (-3, 0)],
+        (-1, 1): [(-2, 1), (-1, 2)],
+        (0, 2): [(0, 3)],
+        (0, -2): [(0, -3)],
+        (2, 0): [(3, 0)],
+        (-2, 0): [(-3, 0)]
+    }
 
     def __init__(self, N_customers=100, vaccination_prop=0, avoid_radius=3):
         super().__init__()
@@ -131,13 +145,30 @@ class CovidSupermarketModel(Model):
         # count problematic contacts. If one of the agents is vaccinated, do not count as a contact
         for customer in self.customers:
             if not customer.vaccinated:
+                safe_pos = []
                 neighbors = self.grid.get_neighbors(
                     customer.pos, moore=False, include_center=True, radius=self.avoid_radius
                 )
                 for neighbor in neighbors:
-                    if type(neighbor) is Customer and neighbor is not customer and not neighbor.vaccinated:
-                        self.n_problematic_contacts += 1
-                        neighbor.is_problematic_contact = True
+                    if type(neighbor) is Obstacle:
+                        delta_pos = (neighbor.pos[0] - customer.pos[0], neighbor.pos[1] - customer.pos[1])
+                        if delta_pos in self.barrier_dict:
+                            delta_pos_list = self.barrier_dict[delta_pos]
+                            real_pos = list([(customer.pos[0] + delta_pos[0], customer.pos[1] + delta_pos[1]) for delta_pos in delta_pos_list])
+                            safe_pos += real_pos
+
+                # print(safe_pos)
+                for neighbor in neighbors:
+                    if type(neighbor) is Customer:
+                        if neighbor is not customer:
+                            if neighbor.pos not in safe_pos:
+                                if not neighbor.vaccinated:
+                                    self.n_problematic_contacts += 1
+                                    neighbor.is_problematic_contact = True
+                            else:
+                                print("Safe!")
+                                print(neighbor.pos, safe_pos)
+
         # divide by 2, because we count contacts double
         self.n_problematic_contacts = int(self.n_problematic_contacts / 2)
 
