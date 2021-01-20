@@ -55,7 +55,7 @@ class Customer(Agent):
             self.shop_cor_list.append(self.random.choice(cor_list))
 
         # do a random permutation of the shopping list
-        self.permute_shopping_list(1)
+        self.permute_shopping_list(max(1, int(len_shoplist/4)))
 
         # add the exit at the end to make sure that the exit is visited last
         exit_list = list(self.model.coord_shelf.get(self.EXIT))
@@ -101,7 +101,7 @@ class Customer(Agent):
     def step(self):
         """Progress step in time """
         if not self.routefinder:
-            self.routefinder = route.Route(self.pos, self.shop_cor_list[0], self.model.grid, forbidden=[Obstacle])
+            self.routefinder = route.Route(self.model, self.pos, self.shop_cor_list[0], self.model.grid, forbidden=[Obstacle])
 
         # check if route exists, if so move agent towards the goal
         if self.routefinder.shortest:

@@ -12,14 +12,15 @@ class Position:
 
 class Route:
 
-	def __init__(self, start, goal, grid, forbidden=[]):
+	def __init__(self, model, start, goal, grid, forbidden=[]):
+		self.model = model
 		self.start = start
 		self.goal = goal
 		self.steps = []
 		self.grid = grid
 		self.forbidden = forbidden
 
-		print("Trying to find route from {} to {}".format(self.start, self.goal))
+		# print("Trying to find route from {} to {}".format(self.start, self.goal))
 		self.shortest = self.find_shortest()
 
 	def get_possible_neighborhood(self, pos):
@@ -54,7 +55,9 @@ class Route:
 
 		# keep exploring until destination found or no tiles left to explore
 		while unexplored:
-			current = min(unexplored.values(), key=lambda x: x.f_score)
+			minimum = min(unexplored.values(), key=lambda x: x.f_score)
+			current = self.model.random.choice([val for val in unexplored.values() if val.f_score == minimum.f_score])
+
 			# check if we reached the destination
 			if current.pos == self.goal:
 				# found goal, reconstruct the most efficient route
