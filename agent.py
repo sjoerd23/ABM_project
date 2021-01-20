@@ -67,6 +67,13 @@ class Customer(Agent):
         exit_list = list(self.model.coord_shelf.get(self.EXIT))
         self.shop_cor_list.append(self.random.choice(exit_list))
 
+    def get_path_multiplier(self):
+        """Calculates multiplier for alternative path B"""
+        total_multiplier = (1 - self.patience) + (1 - self.basic_compliance)
+        if self.vaccinated:
+            total_multiplier += 1
+        return total_multiplier
+
     def permute_shopping_list(self, n_permutations):
         if len(self.shop_cor_list) > 1:
             for i in range(n_permutations):
