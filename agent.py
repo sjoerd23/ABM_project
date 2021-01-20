@@ -1,6 +1,5 @@
 from mesa import Model, Agent
 import route
-import numpy
 
 
 class Customer(Agent):

@@ -29,8 +29,9 @@ class CovidSupermarketModel(Model):
     Agent color represents its status: vaccinated (green), problematic contact (red), else (blue).\
     "
     SHELF_THRESHOLD = 100
+    AVOID_RADIUS = 3
 
-    def __init__(self, floorplan, width, height, N_customers=100, vaccination_prop=0, avoid_radius=3, len_shoplist=10):
+    def __init__(self, floorplan, width, height, N_customers=100, vaccination_prop=0, len_shoplist=10):
         super().__init__()
 
         # init basic properties
@@ -39,7 +40,6 @@ class CovidSupermarketModel(Model):
         self.height = height
         self.N_customers = N_customers
         self.vaccination_prop = vaccination_prop
-        self.avoid_radius = avoid_radius
         self.len_shoplist = len_shoplist
 
         self.exit_list = []
@@ -49,7 +49,7 @@ class CovidSupermarketModel(Model):
         self.schedule = RandomActivation(self)
         self.running = True     # needed to keep simulation running
 
-        self.grid = SuperMarketGrid(self.width, self.height, self.avoid_radius)
+        self.grid = SuperMarketGrid(self.width, self.height, self.AVOID_RADIUS)
 
         # add obstacles to grid
         for i in range(self.width):
@@ -116,7 +116,7 @@ class CovidSupermarketModel(Model):
         else:
             vaccinated = False
 
-        new_agent = Customer(self.next_id(), self, pos, self.avoid_radius, 0, self.len_shoplist, 0, vaccinated)
+        new_agent = Customer(self.next_id(), self, pos, self.AVOID_RADIUS, 0, self.len_shoplist, 0, vaccinated)
         self.grid.place_agent(new_agent, pos)
         self.schedule.add(new_agent)
         return new_agent
@@ -151,7 +151,7 @@ class CovidSupermarketModel(Model):
         for customer in self.customers:
             if not customer.vaccinated:
                 neighbors = self.grid.get_neighbors(
-                    customer.pos, moore=False, include_center=True, radius=customer.avoid_radius
+                    customer.pos, moore=False, include_center=True, radius=self.AVOID_RADIUS
                 )
                 safe_pos = self.grid.get_safe_pos(neighbors, customer, customer.pos)
 
