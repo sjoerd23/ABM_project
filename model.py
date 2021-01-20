@@ -41,13 +41,13 @@ class CovidSupermarketModel(Model):
         self.vaccination_prop = vaccination_prop
         self.avoid_radius = avoid_radius
         self.len_shoplist = len_shoplist
+
+        self.exit_list = []
         self.coord_shelf = {}
         self.coord_start_area = []
-        self.exit_list = []
 
         self.schedule = RandomActivation(self)
         self.running = True     # needed to keep simulation running
-
 
         self.grid = SuperMarketGrid(self.width, self.height, self.avoid_radius)
 
@@ -122,7 +122,7 @@ class CovidSupermarketModel(Model):
         return new_agent
 
     def get_entrance_pos(self):
-        "check if there is a free pos the agent can enter the store in when a place frees up"
+        "Check if there is a free pos the agent can enter the store in when a place frees up"
         free_pos = []
         for pos in self.coord_start_area:
             if not self.is_occupied(pos):
@@ -131,7 +131,6 @@ class CovidSupermarketModel(Model):
             return self.random.choice(free_pos)
         return None
 
-    # creates agent that serves as immovable obstacle
     def new_obstacle(self, pos, type_id):
         """Adds a new agent as obstacle to a random location on the grid. Returns the created 4
         agent
@@ -151,17 +150,10 @@ class CovidSupermarketModel(Model):
         # count problematic contacts. If one of the agents is vaccinated, do not count as a contact
         for customer in self.customers:
             if not customer.vaccinated:
-                safe_pos = []
                 neighbors = self.grid.get_neighbors(
-                    customer.pos, moore=False, include_center=True, radius=self.avoid_radius
+                    customer.pos, moore=False, include_center=True, radius=customer.avoid_radius
                 )
-                for neighbor in neighbors:
-                    if type(neighbor) is Obstacle:
-                        delta_pos = (neighbor.pos[0] - customer.pos[0], neighbor.pos[1] - customer.pos[1])
-                        if delta_pos in core.BARRIER_DICT:
-                            delta_pos_list = core.BARRIER_DICT[delta_pos]
-                            real_pos = list([(customer.pos[0] + delta_pos[0], customer.pos[1] + delta_pos[1]) for delta_pos in delta_pos_list])
-                            safe_pos += real_pos
+                safe_pos = self.grid.get_safe_pos(neighbors, customer, customer.pos)
 
                 for neighbor in neighbors:
                     if type(neighbor) is Customer:
