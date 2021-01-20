@@ -1,4 +1,3 @@
-import csv
 import numpy as np
 import time
 from mesa import Model
@@ -9,24 +8,6 @@ from mesa.datacollection import DataCollector
 import core
 from agent import Customer, Obstacle
 from space import SuperMarketGrid
-
-
-def load_floorplan(map):
-    """Load the floorplan of a supermarket layout specified in map"""
-    grid = []
-    with open(map, encoding='utf-8-sig', newline="") as file:
-        reader = csv.reader(file)
-
-        # create a list for each possible x value in the grid
-        for row in reader:
-            for item in row:
-                grid.append([item])
-            grid_len = len(grid)
-            break
-        for row in reader:
-            for i in range(grid_len):
-                grid[i].insert(0, row[i])
-    return grid
 
 
 class CovidSupermarketModel(Model):
@@ -49,10 +30,13 @@ class CovidSupermarketModel(Model):
     "
     SHELF_THRESHOLD = 100
 
-    def __init__(self, N_customers=100, vaccination_prop=0, avoid_radius=3, len_shoplist=5):
+    def __init__(self, floorplan, width, height, N_customers=100, vaccination_prop=0, avoid_radius=3, len_shoplist=5):
         super().__init__()
 
         # init basic properties
+        self.floorpan = floorplan
+        self.width = width
+        self.height = height
         self.N_customers = N_customers
         self.vaccination_prop = vaccination_prop
         self.avoid_radius = avoid_radius
@@ -64,11 +48,7 @@ class CovidSupermarketModel(Model):
         self.schedule = RandomActivation(self)
         self.running = True     # needed to keep simulation running
 
-        # load floorplan
-        self.floorplan = load_floorplan("data/albert_excel_test.csv")
-        self.height = len(self.floorplan[0])
-        self.width = len(self.floorplan)
-        print(self.width, self.height)
+
         self.grid = SuperMarketGrid(self.width, self.height, self.avoid_radius)
 
         # add obstacles to grid
