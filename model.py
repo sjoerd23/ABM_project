@@ -34,7 +34,7 @@ class CovidSupermarketModel(Model):
         super().__init__()
 
         # init basic properties
-        self.floorpan = floorplan
+        self.floorplan = floorplan
         self.width = width
         self.height = height
         self.N_customers = N_customers

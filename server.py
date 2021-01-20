@@ -4,6 +4,7 @@ from mesa.visualization.UserParam import UserSettableParameter
 from collections import defaultdict
 
 import model
+import core
 from agent import Customer, Obstacle
 
 
@@ -60,10 +61,10 @@ def agent_portrayal(agent):
     return portrayal
 
 
-# Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
-
-# dit hardcoden geeft heel veel gedoe!
-width, height = 84, 61
+# load supermarket floorplan for simulation
+floorplan = core.load_floorplan("data/albert_excel_test.csv")
+width = len(floorplan)
+height = len(floorplan[0])
 
 grid = CanvasGrid2(agent_portrayal, width, height, 800, 600)
 
@@ -81,11 +82,18 @@ customer_slider = UserSettableParameter(
 vaccinated_slider = UserSettableParameter(
     'slider', 'Proportion of vaccinated customers', value=0.1, min_value=0, max_value=1, step=0.01
 )
+model_params = {
+    "floorplan": floorplan,
+    "width": width,
+    "height": height,
+    "N_customers": customer_slider,
+    "vaccination_prop": vaccinated_slider
+}
 
 server = ModularServer(model.CovidSupermarketModel,
                        [grid, chart],
                        "Supermarket Covid Model",
-                       {"N_customers": customer_slider, "vaccination_prop": vaccinated_slider})
+                       model_params)
 
 server.port = 8521
 
