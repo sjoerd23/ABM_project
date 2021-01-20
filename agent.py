@@ -62,16 +62,12 @@ class Customer(Agent):
         self.shop_cor_list.append(self.random.choice(exit_list))
 
     def permute_shopping_list(self, n_permutations):
-        n_items = len(self.shop_cor_list)
-        if n_items > 1:
+        if len(self.shop_cor_list) > 1:
             for i in range(n_permutations):
-                item1 = self.random.choice(self.shop_cor_list)
-                item2 = self.random.choice(self.shop_cor_list)
-                index1 = self.shop_cor_list.index(item1)
-                index2 = self.shop_cor_list.index(item2)
+                index1 = self.shop_cor_list.index(self.random.choice(self.shop_cor_list))
+                index2 = self.shop_cor_list.index(self.random.choice(self.shop_cor_list))
                 self.shop_cor_list[index1], self.shop_cor_list[index2] = \
                     self.shop_cor_list[index2], self.shop_cor_list[index1]
-
 
     def move_keep_distance(self, moore=False):
         """Moves the agent to a random new location on the grid while trying to keep distance to
