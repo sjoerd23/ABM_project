@@ -1,10 +1,7 @@
 from mesa import Model, Agent
 import route
 import numpy
-import random
 
-EXIT = 99
-SHELF_THRES = 100
 
 class Customer(Agent):
     """Agent that describes a single customer
@@ -21,9 +18,9 @@ class Customer(Agent):
         is_problematic_contact (bool): if agent is currently in avoid_radius of other agent
 
     """
+    EXIT = 99
 
-
-    def __init__(self, unique_id, model, pos, vaccinated, avoid_radius, shop_len = 1):
+    def __init__(self, unique_id, model, pos, vaccinated, avoid_radius, len_shoplist):
         super().__init__(unique_id, model)
 
         self.avoid_radius = avoid_radius
@@ -33,47 +30,47 @@ class Customer(Agent):
         self.routefinder = None
         self.shop_cor_list = []
 
-        # adds a maximum of 5 items to a shopping list
+        # adds a maximum of len_shoplist items to a shopping list
         shop_list = []
-
-        #comment this out for easy routes directly to end
-
-        while len(shop_list) < shop_len:
+        while len(shop_list) < len_shoplist:
             shelf_list = list(self.model.coord_shelf)
-            random_shop = random.choice(shelf_list)
-            if random_shop != EXIT:
+            random_shop = self.random.choice(shelf_list)
+            if random_shop != self.EXIT:
                 shop_list.append(random_shop)
 
-        # adds the
-        shop_list.append(EXIT)
         shop_list.sort()
 
         # edit shoppinglist according to location agent was spawned in
         # 100 is the precise difference between the number used for a shelve, and the number used for an empty are near a shelve
-        spawn_value = int(self.model.floorplan[self.pos[0]][self.pos[1]]) - SHELF_THRES
+        spawn_value = int(self.model.floorplan[self.pos[0]][self.pos[1]]) - self.model.SHELF_THRESHOLD
 
         # delete all items from shoplift that have a lower int, than spawn_value
-
-        #needs improvement but for now I didn't want to loop and remove
         new_shop_list = []
-
         for value in shop_list:
             if spawn_value <= value:
                 new_shop_list.append(value)
 
-        # print("old list", shop_list)
-        # print("spawn value", spawn_value)
-        # print("new_list", new_shop_list)
-
         for item in new_shop_list:
             cor_list = list(self.model.coord_shelf.get(item))
+            self.shop_cor_list.append(self.random.choice(cor_list))
 
-            self.shop_cor_list.append(random.choice(cor_list))
+        # do a random permutation of the shopping list
+        self.permute_shopping_list(1)
 
+        # add the exit at the end to make sure that the exit is visited last
+        exit_list = list(self.model.coord_shelf.get(self.EXIT))
+        self.shop_cor_list.append(self.random.choice(exit_list))
 
-        # every agent get's a shopping list.
-
-        #
+    def permute_shopping_list(self, n_permutations):
+        n_items = len(self.shop_cor_list)
+        if n_items > 1:
+            for i in range(n_permutations):
+                item1 = self.random.choice(self.shop_cor_list)
+                item2 = self.random.choice(self.shop_cor_list)
+                index1 = self.shop_cor_list.index(item1)
+                index2 = self.shop_cor_list.index(item2)
+                self.shop_cor_list[index1], self.shop_cor_list[index2] = \
+                    self.shop_cor_list[index2], self.shop_cor_list[index1]
 
 
     def move_keep_distance(self, moore=False):
@@ -106,13 +103,10 @@ class Customer(Agent):
         self.model.grid.move_agent(self, step)
 
     def step(self):
-        """Progress step in time. First move. Then check neighbors if any are infected -> infect
-        """
+        """Progress step in time """
         if not self.routefinder:
             self.routefinder = route.Route(self.pos, self.shop_cor_list[0], self.model.grid, forbidden=[Obstacle])
 
-        # print("print shoplist", self.shop_cor_list)
-        # print("printshorest", self.routefinder.shortest)
         # check if route exists, if so move agent towards the goal
         if self.routefinder.shortest:
             self.model.grid.move_agent(self, self.routefinder.shortest[-1])
@@ -124,9 +118,9 @@ class Customer(Agent):
                 self.shop_cor_list.pop(0)
 
             if len(self.shop_cor_list) == 0:
-                self.model.exit_list.append(self)
-                print("exit list", self.model.exit_list)
-
+                self.model.grid.remove_agent(self)
+                self.model.schedule.remove(self)
+                self.model.customers.remove(self)
 
 
 class Obstacle(Agent):
