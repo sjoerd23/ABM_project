@@ -67,7 +67,7 @@ class CovidSupermarketModel(Model):
         self.coord_shelf = {}
         self.coord_start_area = []
         self.exit_list = []
-        self.enter_list = 1
+        self.enter_list = 0
 
         # start adding obstacles to grid
         for i in range(self.width):
@@ -75,7 +75,8 @@ class CovidSupermarketModel(Model):
                 if int(self.floorplan[i][j]) <= 100:
                     self.new_obstacle((i, j), self.floorplan[i][j])
 
-        adjacency = [(i,j) for i in (-1,0,1) for j in (-1,0,1) if not (i == j == 0)] #the adjacency matrix
+         #the adjacency matrix
+        adjacency = [(i,j) for i in (-1,0,1) for j in (-1,0,1) if not (i == j == 0)]
 
         # get the coordinates of all the shelves, and the coordinates of accesible spaces around them to a dict
         for i in range(self.width):
@@ -92,7 +93,7 @@ class CovidSupermarketModel(Model):
 
                             free_space = True
                     if not free_space:
-                        print("Error unaccesible shelf cell! ", i, j, floorplan[i][j])
+                        print("Error unaccesible shelf cell! ", i, j, self.floorplan[i][j])
 
                 if shelf_val == 101:
                     self.coord_start_area.append((i, j))
@@ -236,8 +237,9 @@ class CovidSupermarketModel(Model):
 
         self.schedule.step()
 
-        print(self.schedule)
+        # print(self.schedule)
         # misschien moet ik hier nog een if statement toevoegen voor snellere computation
+        print("exit list", self.exit_list)
         for agent in self.exit_list:
             self.grid.remove_agent(agent)
             print("test1")
@@ -248,7 +250,7 @@ class CovidSupermarketModel(Model):
 
             self.enter_list += 1
 
-        self.exit_list == []
+        self.exit_list = []
         print("Total time: {:2f}s".format(time.time()-time_start))
         #
         # calculate number of problematic contacts

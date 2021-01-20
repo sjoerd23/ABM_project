@@ -3,6 +3,9 @@ import route
 import numpy
 import random
 
+EXIT = 99
+SHELF_THRES = 100
+
 class Customer(Agent):
     """Agent that describes a single customer
 
@@ -18,6 +21,8 @@ class Customer(Agent):
         is_problematic_contact (bool): if agent is currently in avoid_radius of other agent
 
     """
+
+
     def __init__(self, unique_id, model, pos, vaccinated, avoid_radius, shop_len = 1):
         super().__init__(unique_id, model)
 
@@ -27,6 +32,7 @@ class Customer(Agent):
         self.is_problematic_contact = False
         self.routefinder = None
         self.shop_cor_list = []
+
         # adds a maximum of 5 items to a shopping list
         shop_list = []
 
@@ -35,16 +41,16 @@ class Customer(Agent):
         while len(shop_list) < shop_len:
             shelf_list = list(self.model.coord_shelf)
             random_shop = random.choice(shelf_list)
-            if random_shop != 99:
+            if random_shop != EXIT:
                 shop_list.append(random_shop)
 
         # adds the
-        shop_list.append(99)
+        shop_list.append(EXIT)
         shop_list.sort()
 
         # edit shoppinglist according to location agent was spawned in
         # 100 is the precise difference between the number used for a shelve, and the number used for an empty are near a shelve
-        spawn_value = int(self.model.floorplan[self.pos[0]][self.pos[1]]) - 100
+        spawn_value = int(self.model.floorplan[self.pos[0]][self.pos[1]]) - SHELF_THRES
 
         # delete all items from shoplift that have a lower int, than spawn_value
 
@@ -55,9 +61,9 @@ class Customer(Agent):
             if spawn_value <= value:
                 new_shop_list.append(value)
 
-        print("old list", shop_list)
-        print("spawn value", spawn_value)
-        print("new_list", new_shop_list)
+        # print("old list", shop_list)
+        # print("spawn value", spawn_value)
+        # print("new_list", new_shop_list)
 
         for item in new_shop_list:
             cor_list = list(self.model.coord_shelf.get(item))
@@ -105,8 +111,8 @@ class Customer(Agent):
         if not self.routefinder:
             self.routefinder = route.Route(self.pos, self.shop_cor_list[0], self.model.grid, forbidden=[Obstacle])
 
-        print("print shoplist", self.shop_cor_list)
-        print("printshorest", self.routefinder.shortest)
+        # print("print shoplist", self.shop_cor_list)
+        # print("printshorest", self.routefinder.shortest)
         # check if route exists, if so move agent towards the goal
         if self.routefinder.shortest:
             self.model.grid.move_agent(self, self.routefinder.shortest[-1])
