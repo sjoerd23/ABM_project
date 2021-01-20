@@ -61,7 +61,9 @@ def agent_portrayal(agent):
 
 
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
-width, height = 84, 60
+
+# dit hardcoden geeft heel veel gedoe!
+width, height = 84, 61
 
 grid = CanvasGrid2(agent_portrayal, width, height, 800, 600)
 
@@ -74,7 +76,7 @@ chart = ChartModule(
 
 # Create the server, and pass the grid and the graph
 customer_slider = UserSettableParameter(
-    'slider', 'Number of customers', value=100, min_value=1, max_value=500, step=1
+    'slider', 'Number of customers', value=2, min_value=1, max_value=500, step=1
 )
 vaccinated_slider = UserSettableParameter(
     'slider', 'Proportion of vaccinated customers', value=0.1, min_value=0, max_value=1, step=0.01

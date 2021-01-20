@@ -60,20 +60,48 @@ class CovidSupermarketModel(Model):
         self.running = True     # needed to keep simulation running
 
         # start adding obstacles
-        floorplan = load_floorplan("data/albert.csv")
-        self.height = len(floorplan[0])
-        self.width = len(floorplan)
+        self.floorplan = load_floorplan("data/albert_excel_test.csv")
+        self.height = len(self.floorplan[0])
+        self.width = len(self.floorplan)
         self.grid = SuperMarketGrid(self.width, self.height, self.avoid_radius)
+        self.coord_shelf = {}
+        self.coord_start_area = []
+        self.exit_list = []
+        self.enter_list = 1
 
         # start adding obstacles to grid
         for i in range(self.width):
             for j in range(self.height):
-                if int(floorplan[i][j]) != 0:
-                    self.new_obstacle((i, j), floorplan[i][j])
+                if int(self.floorplan[i][j]) <= 100:
+                    self.new_obstacle((i, j), self.floorplan[i][j])
+
+        adjacency = [(i,j) for i in (-1,0,1) for j in (-1,0,1) if not (i == j == 0)] #the adjacency matrix
+
+        # get the coordinates of all the shelves, and the coordinates of accesible spaces around them to a dict
+        for i in range(self.width):
+            for j in range(self.height):
+                shelf_val = int(self.floorplan[i][j])
+                if shelf_val < 100:
+                    free_space = False
+                    for cor in adjacency:
+                        if int(self.floorplan[i + cor[0]][j + cor[1]])> 100:
+                            if shelf_val in self.coord_shelf.keys():
+                                self.coord_shelf[shelf_val].add((i + cor[0], j + cor[1]))
+                            else:
+                                self.coord_shelf.update({shelf_val : {(i + cor[0], j + cor[1])}})
+
+                            free_space = True
+                    if not free_space:
+                        print("Error unaccesible shelf cell! ", i, j, floorplan[i][j])
+
+                if shelf_val == 101:
+                    self.coord_start_area.append((i, j))
+
 
         # start adding customers
         self.customers = [self.new_customer() for _ in range(N_customers)]
 
+        print("print self customer", self.customers)
         # calculate initial amount of problematic contacts
         self.n_problematic_contacts = 0
         self.problematic_contacts()
@@ -109,7 +137,30 @@ class CovidSupermarketModel(Model):
         new_agent = Customer(self.next_id(), self, pos, vaccinated, self.avoid_radius)
         self.grid.place_agent(new_agent, pos)
         self.schedule.add(new_agent)
+
         return new_agent
+
+    def replacement_new_customer(self, pos):
+        """Adds a new agent in the grid when another agent leaves """
+
+        # vaccinate this customer according to proportion vaccinated of population
+        if self.vaccination_prop > self.random.random():
+            vaccinated = True
+        else:
+            vaccinated = False
+
+        new_agent = Customer(self.next_id(), self, pos, vaccinated, self.avoid_radius)
+        self.grid.place_agent(new_agent, pos)
+        self.schedule.add(new_agent)
+        self.customers.append(new_agent)
+        return new_agent
+
+    def check_replacement_pos(self):
+         "check if there is a free pos the agent can enter the store in when a place frees up"
+         for pos in self.coord_start_area:
+             if not self.is_occupied((pos[0], pos[1])):
+                 return pos
+             return None
 
     # creates agent that serves as immovable obstacle
     def new_obstacle(self, pos, type_id):
@@ -174,9 +225,32 @@ class CovidSupermarketModel(Model):
     def step(self):
         """Progress simulation by one step """
         time_start = time.time()
-        self.schedule.step()
-        print("Total time: {:2f}s".format(time.time()-time_start))
+        if self.enter_list > 0:
+            new_pos = self.check_replacement_pos()
+            if new_pos:
+                self.replacement_new_customer(new_pos)
+                self.enter_list -= 1
 
+
+
+
+        self.schedule.step()
+
+        print(self.schedule)
+        # misschien moet ik hier nog een if statement toevoegen voor snellere computation
+        for agent in self.exit_list:
+            self.grid.remove_agent(agent)
+            print("test1")
+            self.schedule.remove(agent)
+            print("test2")
+            self.customers.remove(agent)
+            print("test3")
+
+            self.enter_list += 1
+
+        self.exit_list == []
+        print("Total time: {:2f}s".format(time.time()-time_start))
+        #
         # calculate number of problematic contacts
-        self.problematic_contacts()
-        self.datacollector.collect(self)
+        # self.problematic_contacts()
+        # self.datacollector.collect(self)
