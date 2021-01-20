@@ -20,15 +20,21 @@ class Customer(Agent):
     """
     EXIT = 99
 
-    def __init__(self, unique_id, model, pos, vaccinated, avoid_radius, len_shoplist):
+    def __init__(
+        self, unique_id, model, pos, avoid_radius, basic_compliance, len_shoplist, patience,
+        vaccinated
+    ):
         super().__init__(unique_id, model)
 
+
         self.avoid_radius = avoid_radius
-        self.pos = pos
-        self.vaccinated = vaccinated
+        self.basic_compliance = basic_compliance
         self.is_problematic_contact = False
+        self.patience = patience
+        self.pos = pos
         self.routefinder = None
         self.shop_cor_list = []
+        self.vaccinated = vaccinated
 
         # adds a maximum of len_shoplist items to a shopping list
         shop_list = []

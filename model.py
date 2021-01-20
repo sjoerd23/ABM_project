@@ -83,7 +83,7 @@ class CovidSupermarketModel(Model):
 
 
         # start adding customers
-        self.customers = [self.new_customer() for _ in range(N_customers)]
+        self.customers = [self.add_customer(self.get_free_pos()) for _ in range(N_customers)]
 
         # calculate initial amount of problematic contacts
         self.n_problematic_contacts = 0
@@ -107,7 +107,7 @@ class CovidSupermarketModel(Model):
         neighbors_pos = [x.pos for x in self.grid.get_neighbors(pos, moore, radius=radius)]
         return list([x for x in neighborhood if x not in neighbors_pos])
 
-    def new_customer(self):
+    def add_customer(self, pos):
         """Adds a new agent to a random location on the grid. Returns the created agent"""
 
         # vaccinate this customer according to proportion vaccinated of population
@@ -116,28 +116,12 @@ class CovidSupermarketModel(Model):
         else:
             vaccinated = False
 
-        pos = self.get_free_pos()
-        new_agent = Customer(self.next_id(), self, pos, vaccinated, self.avoid_radius, self.len_shoplist)
+        new_agent = Customer(self.next_id(), self, pos, self.avoid_radius, 0, self.len_shoplist, 0, vaccinated)
         self.grid.place_agent(new_agent, pos)
         self.schedule.add(new_agent)
         return new_agent
 
-    def replacement_new_customer(self, pos):
-        """Adds a new agent in the grid when another agent leaves """
-
-        # vaccinate this customer according to proportion vaccinated of population
-        if self.vaccination_prop > self.random.random():
-            vaccinated = True
-        else:
-            vaccinated = False
-
-        new_agent = Customer(self.next_id(), self, pos, vaccinated, self.avoid_radius, self.len_shoplist)
-        self.grid.place_agent(new_agent, pos)
-        self.schedule.add(new_agent)
-        self.customers.append(new_agent)
-        return new_agent
-
-    def check_replacement_pos(self):
+    def get_entrance_pos(self):
         "check if there is a free pos the agent can enter the store in when a place frees up"
         free_pos = []
         for pos in self.coord_start_area:
@@ -210,9 +194,9 @@ class CovidSupermarketModel(Model):
 
         # let new agents enter if there are less agents than N_customers
         if len(self.customers) < self.N_customers:
-            new_pos = self.check_replacement_pos()
+            new_pos = self.get_entrance_pos()
             if new_pos:
-                self.replacement_new_customer(new_pos)
+                self.add_customer(new_pos)
 
         self.schedule.step()
 
