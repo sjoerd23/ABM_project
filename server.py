@@ -80,7 +80,7 @@ customer_slider = UserSettableParameter(
     'slider', 'Number of customers', value=100, min_value=1, max_value=500, step=1
 )
 vaccinated_slider = UserSettableParameter(
-    'slider', 'Proportion of vaccinated customers', value=0.1, min_value=0, max_value=1, step=0.01
+    'slider', 'Proportion of vaccinated customers', value=0, min_value=0, max_value=1, step=0.01
 )
 model_params = {
     "floorplan": floorplan,

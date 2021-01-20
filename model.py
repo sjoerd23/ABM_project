@@ -212,7 +212,7 @@ class CovidSupermarketModel(Model):
         if len(self.customers) < self.N_customers:
             new_pos = self.check_replacement_pos()
             if new_pos:
-                self.customers.append(self.replacement_new_customer(new_pos))
+                self.replacement_new_customer(new_pos)
 
         self.schedule.step()
 
