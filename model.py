@@ -1,5 +1,6 @@
 import numpy as np
 import time
+import tqdm
 from mesa import Model
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
@@ -179,7 +180,7 @@ class CovidSupermarketModel(Model):
 
     def run_model(self, n_steps=200):
         """Run model for n_steps"""
-        for i in range(n_steps):
+        for i in tqdm.tqdm(range(n_steps)):
             self.step()
 
     def step(self):
@@ -198,4 +199,4 @@ class CovidSupermarketModel(Model):
         self.problematic_contacts()
         self.datacollector.collect(self)
 
-        print("Total time last step: {:2f}s".format(time.time()-time_start))
+        # print("Total time last step: {:2f}s".format(time.time()-time_start))
