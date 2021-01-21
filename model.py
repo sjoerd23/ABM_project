@@ -42,6 +42,7 @@ class CovidSupermarketModel(Model):
         self.vaccination_prop = vaccination_prop
         self.len_shoplist = len_shoplist
 
+        self.customers = []
         self.exit_list = []
         self.coord_shelf = {}
         self.coord_start_area = []
@@ -83,7 +84,8 @@ class CovidSupermarketModel(Model):
 
 
         # start adding customers
-        self.customers = [self.add_customer(self.get_free_pos()) for _ in range(N_customers)]
+        for _ in range(N_customers):
+            self.add_customer(self.get_free_pos())
 
         # calculate initial amount of problematic contacts
         self.n_problematic_contacts = 0
@@ -119,7 +121,7 @@ class CovidSupermarketModel(Model):
         new_agent = Customer(self.next_id(), self, pos, self.AVOID_RADIUS, 0, self.len_shoplist, 0, vaccinated)
         self.grid.place_agent(new_agent, pos)
         self.schedule.add(new_agent)
-        return new_agent
+        self.customers.append(new_agent)
 
     def get_entrance_pos(self):
         "Check if there is a free pos the agent can enter the store in when a place frees up"
