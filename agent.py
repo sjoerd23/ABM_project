@@ -119,17 +119,24 @@ class Customer(Agent):
         # check if route exists, if so move agent towards the goal
         if self.routefinder.shortest:
 
-            # check if goal is within vision
-            if self.routefinder.path_length > self.vision:
-                # check if there are people in the way
-                if not self.routefinder.check_if_crowded(self.vision, self.pos):
-                    # our path is free! move the agent to the next step
+            # check if there are people in the way
+            if not self.routefinder.check_if_crowded(self.vision, self.pos):
+                # our path is free! move the agent to the next step
+                self.routefinder.move_agent(self)
+
+            else:
+                # our path is crowded, check if goal is within vision
+                if self.routefinder.path_length < self.vision:
+                    # patience thingy
                     self.routefinder.move_agent(self)
-               # else:
-                    # there is somebody in our way, check if there is a good alternative
-                    #forbidden_cells = self.model.grid.get_forbidden_cells(self.pos, self.vision)
-
-
+                else:
+                    # still far away from goal
+                    forbidden_cells = self.model.grid.get_forbidden_cells(self.pos, self.vision)
+                    alternative_route = self.routefinder.avoid(forbidden_cells)
+                    # check if a alternative route was found
+                    if alternative_route:
+                        self.routefinder.shortest = alternative_route
+                        self.routefinder.move_agent(self)
 
             # if checkpoint is reached remove checkpoint
             if self.routefinder.path_length == 0:

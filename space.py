@@ -59,11 +59,9 @@ class SuperMarketGrid(MultiGrid):
 				distance = core.get_distance(pos, cell)
 				if distance < 3:
 					correction = 3 - distance
-					print(correction)
-			if self.get_score(cell) > threshold + correction:
+			if self.get_score(cell) > threshold - correction:
 				forbidden.append(forbidden)
 
-		print(forbidden)
 		return forbidden
 
 	def _add_agent_score(self, agent, new_pos):

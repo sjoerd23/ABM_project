@@ -28,15 +28,20 @@ class Route:
 		self.shortest.pop()
 		self.path_length -= 1
 
-	def get_possible_neighborhood(self, pos):
+	def get_possible_neighborhood(self, pos, forbidden_cells=[]):
 		"""Returns all the possible locations to walk to."""
 		possible = []
 		candidates = self.grid.get_neighborhood(pos, False, radius=1)
 
 		for candidate in candidates:
+			# check if the cell position is in the forbidden location list
+			if candidate in forbidden_cells:
+				continue
+
 			content_list = self.grid.get_cell_list_contents(candidate)
 			valid = True
 			for content in content_list:
+				# check if the agent type is in the forbidden agent type list
 				if type(content) in self.forbidden:
 					valid = False
 					continue
@@ -70,12 +75,10 @@ class Route:
 		print("Trying to find route from {} to {}".format(self.start, self.goal))
 		return self.a_star("manhattan")
 
-	def avoid(self, avoid_cells):
-		# TODO implement function
-		return None
+	def avoid(self, forbidden_cells):
+		return self.a_star("manhattan", forbidden_cells)
 
-
-	def a_star(self, distance_method):
+	def a_star(self, distance_method, forbidden_cells=[]):
 		"""A* path finding algorithm.
 		Based on pseudocode on Wikipedia: https://en.wikipedia.org/wiki/A*_search_algorithm"""
 		start_object = Position(self.start, 0, get_distance(self.start, self.goal))
@@ -101,7 +104,7 @@ class Route:
 			unexplored.pop(current.pos)
 
 			# check all the neighbours
-			for neighbour_pos in self.get_possible_neighborhood(current.pos):
+			for neighbour_pos in self.get_possible_neighborhood(current.pos, forbidden_cells):
 				if neighbour_pos in explored:
 					neighbour = explored[neighbour_pos]
 				else:
