@@ -48,7 +48,7 @@ class SuperMarketGrid(MultiGrid):
 				score += self.default_score
 		return score
 
-	def get_forbidden_cells(self, pos, radius, threshold=0, agent_on_location=False):
+	def get_forbidden_cells(self, pos, radius, threshold=0, agent_on_location=True):
 		"""Returns all the cells with a crowded score higher than the given threshold value"""
 		forbidden = []
 		cells = self.get_neighborhood(pos, moore=False, include_center=True, radius=radius)
