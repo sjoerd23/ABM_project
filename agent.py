@@ -1,6 +1,5 @@
 from mesa import Model, Agent
 import route
-import numpy
 
 
 class Customer(Agent):
@@ -20,16 +19,22 @@ class Customer(Agent):
     """
     EXIT = 99
 
-    def __init__(self, unique_id, model, pos, vaccinated, avoid_radius, len_shoplist, vision=5):
+    def __init__(
+        self, unique_id, model, pos, avoid_radius, basic_compliance, len_shoplist, patience,
+        vaccinated, vision=5
+    ):
         super().__init__(unique_id, model)
 
+
         self.avoid_radius = avoid_radius
-        self.pos = pos
-        self.vaccinated = vaccinated
+        self.basic_compliance = basic_compliance
         self.is_problematic_contact = False
+        self.patience = patience
+        self.pos = pos
         self.routefinder = None
         self.shop_cor_list = []
         self.vision = vision
+        self.vaccinated = vaccinated
 
         # adds a maximum of len_shoplist items to a shopping list
         shop_list = []
@@ -56,11 +61,18 @@ class Customer(Agent):
             self.shop_cor_list.append(self.random.choice(cor_list))
 
         # do a random permutation of the shopping list
-        self.permute_shopping_list(1)
+        self.permute_shopping_list(max(1, int(len_shoplist/4)))
 
         # add the exit at the end to make sure that the exit is visited last
         exit_list = list(self.model.coord_shelf.get(self.EXIT))
         self.shop_cor_list.append(self.random.choice(exit_list))
+
+    def get_path_multiplier(self):
+        """Calculates multiplier for alternative path B"""
+        total_multiplier = (1 - self.patience) + (1 - self.basic_compliance)
+        if self.vaccinated:
+            total_multiplier += 1
+        return total_multiplier
 
     def permute_shopping_list(self, n_permutations):
         if len(self.shop_cor_list) > 1:
@@ -102,7 +114,7 @@ class Customer(Agent):
     def step(self):
         """Progress step in time """
         if not self.routefinder:
-            self.routefinder = route.Route(self.pos, self.shop_cor_list[0], self.model.grid, forbidden=[Obstacle])
+            self.routefinder = route.Route(self.model, self.pos, self.shop_cor_list[0], self.model.grid, forbidden=[Obstacle])
 
         # check if route exists, if so move agent towards the goal
         if self.routefinder.shortest:

@@ -1,5 +1,6 @@
 import numpy as np
 import time
+import tqdm
 from mesa import Model
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
@@ -29,8 +30,9 @@ class CovidSupermarketModel(Model):
     Agent color represents its status: vaccinated (green), problematic contact (red), else (blue).\
     "
     SHELF_THRESHOLD = 100
+    AVOID_RADIUS = 3
 
-    def __init__(self, floorplan, width, height, N_customers=100, vaccination_prop=0, avoid_radius=3, len_shoplist=5):
+    def __init__(self, floorplan, width, height, N_customers=100, vaccination_prop=0, len_shoplist=10):
         super().__init__()
 
         # init basic properties
@@ -39,17 +41,17 @@ class CovidSupermarketModel(Model):
         self.height = height
         self.N_customers = N_customers
         self.vaccination_prop = vaccination_prop
-        self.avoid_radius = avoid_radius
         self.len_shoplist = len_shoplist
+
+        self.customers = []
+        self.exit_list = []
         self.coord_shelf = {}
         self.coord_start_area = []
-        self.exit_list = []
 
         self.schedule = RandomActivation(self)
         self.running = True     # needed to keep simulation running
 
-
-        self.grid = SuperMarketGrid(self.width, self.height, self.avoid_radius)
+        self.grid = SuperMarketGrid(self.width, self.height, self.AVOID_RADIUS)
 
         # add obstacles to grid
         for i in range(self.width):
@@ -83,7 +85,8 @@ class CovidSupermarketModel(Model):
 
 
         # start adding customers
-        self.customers = [self.new_customer() for _ in range(N_customers)]
+        for _ in range(N_customers):
+            self.add_customer(self.get_free_pos())
 
         # calculate initial amount of problematic contacts
         self.n_problematic_contacts = 0
@@ -107,7 +110,7 @@ class CovidSupermarketModel(Model):
         neighbors_pos = [x.pos for x in self.grid.get_neighbors(pos, moore, radius=radius)]
         return list([x for x in neighborhood if x not in neighbors_pos])
 
-    def new_customer(self):
+    def add_customer(self, pos):
         """Adds a new agent to a random location on the grid. Returns the created agent"""
 
         # vaccinate this customer according to proportion vaccinated of population
@@ -116,29 +119,13 @@ class CovidSupermarketModel(Model):
         else:
             vaccinated = False
 
-        pos = self.get_free_pos()
-        new_agent = Customer(self.next_id(), self, pos, vaccinated, self.avoid_radius, self.len_shoplist)
-        self.grid.place_agent(new_agent, pos)
-        self.schedule.add(new_agent)
-        return new_agent
-
-    def replacement_new_customer(self, pos):
-        """Adds a new agent in the grid when another agent leaves """
-
-        # vaccinate this customer according to proportion vaccinated of population
-        if self.vaccination_prop > self.random.random():
-            vaccinated = True
-        else:
-            vaccinated = False
-
-        new_agent = Customer(self.next_id(), self, pos, vaccinated, self.avoid_radius, self.len_shoplist)
+        new_agent = Customer(self.next_id(), self, pos, self.AVOID_RADIUS, 0, self.len_shoplist, 0, vaccinated)
         self.grid.place_agent(new_agent, pos)
         self.schedule.add(new_agent)
         self.customers.append(new_agent)
-        return new_agent
 
-    def check_replacement_pos(self):
-        "check if there is a free pos the agent can enter the store in when a place frees up"
+    def get_entrance_pos(self):
+        "Check if there is a free pos the agent can enter the store in when a place frees up"
         free_pos = []
         for pos in self.coord_start_area:
             if not self.is_occupied(pos):
@@ -147,7 +134,6 @@ class CovidSupermarketModel(Model):
             return self.random.choice(free_pos)
         return None
 
-    # creates agent that serves as immovable obstacle
     def new_obstacle(self, pos, type_id):
         """Adds a new agent as obstacle to a random location on the grid. Returns the created 4
         agent
@@ -167,17 +153,10 @@ class CovidSupermarketModel(Model):
         # count problematic contacts. If one of the agents is vaccinated, do not count as a contact
         for customer in self.customers:
             if not customer.vaccinated:
-                safe_pos = []
                 neighbors = self.grid.get_neighbors(
-                    customer.pos, moore=False, include_center=True, radius=self.avoid_radius
+                    customer.pos, moore=False, include_center=True, radius=self.AVOID_RADIUS
                 )
-                for neighbor in neighbors:
-                    if type(neighbor) is Obstacle:
-                        delta_pos = (neighbor.pos[0] - customer.pos[0], neighbor.pos[1] - customer.pos[1])
-                        if delta_pos in core.BARRIER_DICT:
-                            delta_pos_list = core.BARRIER_DICT[delta_pos]
-                            real_pos = list([(customer.pos[0] + delta_pos[0], customer.pos[1] + delta_pos[1]) for delta_pos in delta_pos_list])
-                            safe_pos += real_pos
+                safe_pos = self.grid.get_safe_pos(neighbors, customer, customer.pos)
 
                 for neighbor in neighbors:
                     if type(neighbor) is Customer:
@@ -201,7 +180,7 @@ class CovidSupermarketModel(Model):
 
     def run_model(self, n_steps=200):
         """Run model for n_steps"""
-        for i in range(n_steps):
+        for i in tqdm.tqdm(range(n_steps)):
             self.step()
 
     def step(self):
@@ -210,9 +189,9 @@ class CovidSupermarketModel(Model):
 
         # let new agents enter if there are less agents than N_customers
         if len(self.customers) < self.N_customers:
-            new_pos = self.check_replacement_pos()
+            new_pos = self.get_entrance_pos()
             if new_pos:
-                self.customers.append(self.replacement_new_customer(new_pos))
+                self.add_customer(new_pos)
 
         self.schedule.step()
 
@@ -220,4 +199,4 @@ class CovidSupermarketModel(Model):
         self.problematic_contacts()
         self.datacollector.collect(self)
 
-        print("Total time last step: {:2f}s".format(time.time()-time_start))
+        # print("Total time last step: {:2f}s".format(time.time()-time_start))
