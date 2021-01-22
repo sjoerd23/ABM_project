@@ -121,15 +121,13 @@ class Customer(Agent):
 
             # check if goal is within vision
             if self.routefinder.path_length > self.vision:
-                print(";a;a;a;a;a")
                 # check if there are people in the way
-                if not self.routefinder.check_if_crowded(self.vision):
-                    print("hoi!")
+                if not self.routefinder.check_if_crowded(self.vision, self.pos):
                     # our path is free! move the agent to the next step
-                    self.model.grid.move_agent(self, self.routefinder.shortest[-1])
-                else:
+                    self.routefinder.move_agent(self)
+               # else:
                     # there is somebody in our way, check if there is a good alternative
-                    forbidden_cells = self.model.grid.get_forbidden_cells(self.pos, self.vision)
+                    #forbidden_cells = self.model.grid.get_forbidden_cells(self.pos, self.vision)
 
 
 

@@ -24,8 +24,8 @@ class Route:
 
 	def move_agent(self, agent):
 		"""Moves the agent to the next step, updates the list and self.path_lenght"""
-		self.model.grid.move_agent(agent, self.routefinder.shortest[-1])
-		self.routefinder.shortest.pop()
+		self.model.grid.move_agent(agent, self.shortest[-1])
+		self.shortest.pop()
 		self.path_length -= 1
 
 	def get_possible_neighborhood(self, pos):
@@ -51,13 +51,17 @@ class Route:
 
 		if path_length < vision:
 			vision = path_length
-		print("Hele route", self.shortest)
-		cells = self.shortest[-vision:-1]
-		print("Cells", cells)
-		score = self.grid.get_score(cells)
+
+		cells = self.shortest[-vision:]
+		score = 0
+		for cell in cells:
+			correction = 0
+			if agent_pos:
+				correction = get_distance(agent_pos, cell)
+			score += self.grid.get_score(cell) - correction
 		print(cells, score)
 		# score is always 3 because agent own score
-		return score != 3
+		return score > 0
 
 	def find_shortest(self):
 		print("Trying to find route from {} to {}".format(self.start, self.goal))
@@ -83,10 +87,11 @@ class Route:
 			# check if we reached the destination
 			if current.pos == self.goal:
 				# found goal, reconstruct the most efficient route
-				queue = [current.pos]
+				queue = []
 				while current.parent:
-					current = current.parent
 					queue.append(current.pos)
+					current = current.parent
+
 				return queue
 
 			# we explored this location, so remove from the unexplored list
