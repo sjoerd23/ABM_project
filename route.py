@@ -18,9 +18,13 @@ class Route:
 		self.goal = goal
 		self.steps = []
 		self.grid = grid
-		self.forbidden = forbidden_type
+		self.forbidden_type = forbidden_type
+		self.forbidden_cells = forbidden_cells
 		self.shortest = self.find_shortest()
-		self.path_length = len(self.shortest)
+		if self.shortest:
+			self.path_length = len(self.shortest)
+		else:
+			self.path_length = None
 
 	def move_agent(self, agent):
 		"""Moves the agent to the next step, updates the list and self.path_lenght"""
@@ -42,7 +46,7 @@ class Route:
 			valid = True
 			for content in content_list:
 				# check if the agent type is in the forbidden agent type list
-				if type(content) in self.forbidden:
+				if type(content) in self.forbidden_type:
 					valid = False
 					continue
 			if valid:
@@ -63,8 +67,8 @@ class Route:
 			correction = 0
 			if agent_pos:
 				distance = get_distance(agent_pos, cell)
-				if distance < 3:
-					correction = 3 - distance
+				if distance <= self.model.AVOID_RADIUS:
+					correction = self.model.AVOID_RADIUS + 1 - distance
 
 			score += self.grid.get_score(cell) - correction
 		print(cells, score)
@@ -76,7 +80,7 @@ class Route:
 		return self.a_star("manhattan")
 
 
-	def a_star(self, distance_method, forbidden_cells=[]):
+	def a_star(self, distance_method):
 		"""A* path finding algorithm.
 		Based on pseudocode on Wikipedia: https://en.wikipedia.org/wiki/A*_search_algorithm"""
 		start_object = Position(self.start, 0, get_distance(self.start, self.goal))
@@ -102,7 +106,7 @@ class Route:
 			unexplored.pop(current.pos)
 
 			# check all the neighbours
-			for neighbour_pos in self.get_possible_neighborhood(current.pos, forbidden_cells):
+			for neighbour_pos in self.get_possible_neighborhood(current.pos, self.forbidden_cells):
 				if neighbour_pos in explored:
 					neighbour = explored[neighbour_pos]
 				else:
