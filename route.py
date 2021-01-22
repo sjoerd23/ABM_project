@@ -12,13 +12,13 @@ class Position:
 
 class Route:
 
-	def __init__(self, model, start, goal, grid, forbidden=[]):
+	def __init__(self, model, start, goal, grid, forbidden_type=[], forbidden_cells=[]):
 		self.model = model
 		self.start = start
 		self.goal = goal
 		self.steps = []
 		self.grid = grid
-		self.forbidden = forbidden
+		self.forbidden = forbidden_type
 		self.shortest = self.find_shortest()
 		self.path_length = len(self.shortest)
 
@@ -75,8 +75,6 @@ class Route:
 		print("Trying to find route from {} to {}".format(self.start, self.goal))
 		return self.a_star("manhattan")
 
-	def avoid(self, forbidden_cells):
-		return self.a_star("manhattan", forbidden_cells)
 
 	def a_star(self, distance_method, forbidden_cells=[]):
 		"""A* path finding algorithm.
