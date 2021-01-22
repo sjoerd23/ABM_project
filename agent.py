@@ -132,15 +132,15 @@ class Customer(Agent):
                 else:
                     # still far away from goal
                     forbidden_cells = self.model.grid.get_forbidden_cells(self.pos, self.vision)
-                    if forbidden_cells:
-                        print("forbidden cells",forbidden_cells)
                     alternative_route = route.Route(self.model, self.pos, self.shop_cor_list[0], self.model.grid, forbidden_type=[Obstacle], forbidden_cells=forbidden_cells)
                     # check if a alternative route was found
                     if alternative_route.shortest:
-                        print("Choosing alternative route")
-                        print("Old route", self.routefinder.shortest)
+                        # print("Choosing alternative route")
+                        # print("Old route", self.routefinder.shortest)
                         self.routefinder = alternative_route
-                        print("New route", self.routefinder.shortest)
+                        # print("New route", self.routefinder.shortest)
+                        self.routefinder.move_agent(self)
+                    else:
                         self.routefinder.move_agent(self)
 
             # if checkpoint is reached remove checkpoint

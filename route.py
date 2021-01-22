@@ -71,12 +71,12 @@ class Route:
 					correction = self.model.AVOID_RADIUS + 1 - distance
 
 			score += self.grid.get_score(cell) - correction
-		print(cells, score)
+		# print(cells, score)
 		# score is always 3 because agent own score
 		return score > 0
 
 	def find_shortest(self):
-		print("Trying to find route from {} to {}".format(self.start, self.goal))
+		# print("Trying to find route from {} to {}".format(self.start, self.goal))
 		return self.a_star("manhattan")
 
 
