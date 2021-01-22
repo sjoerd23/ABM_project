@@ -58,7 +58,7 @@ class SuperMarketGrid(MultiGrid):
 			if agent_on_location:
 				distance = core.get_distance(pos, cell)
 				if distance <= self.model.AVOID_RADIUS:
-					correction = self.model.AVOID_RADIUS - distance
+					correction = self.model.AVOID_RADIUS - distance + 1
 			if self.get_score(cell) > threshold - correction:
 				forbidden.append(forbidden)
 
