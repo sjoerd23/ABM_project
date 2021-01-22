@@ -57,7 +57,10 @@ class Route:
 		for cell in cells:
 			correction = 0
 			if agent_pos:
-				correction = get_distance(agent_pos, cell)
+				distance = get_distance(agent_pos, cell)
+				if distance < 3:
+					correction = 3 - distance
+
 			score += self.grid.get_score(cell) - correction
 		print(cells, score)
 		# score is always 3 because agent own score
