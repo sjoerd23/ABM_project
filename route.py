@@ -18,9 +18,14 @@ class Route:
 		self.steps = []
 		self.grid = grid
 		self.forbidden = forbidden
-
-		print("Trying to find route from {} to {}".format(self.start, self.goal))
 		self.shortest = self.find_shortest()
+		self.path_length = len(self.shortest)
+
+	def move_agent(self, agent):
+		"""Moves the agent to the next step, updates the list and self.path_lenght"""
+		self.model.grid.move_agent(agent, self.routefinder.shortest[-1])
+		self.routefinder.shortest.pop()
+		self.path_length -= 1
 
 	def get_possible_neighborhood(self, pos):
 		"""Returns all the possible locations to walk to."""
@@ -39,11 +44,27 @@ class Route:
 
 		return possible
 
+	def check_if_crowded(self, vision):
+		"""Checks if there are people in the way during the next x steps"""
+		path_length = len(self.shortest)
+
+		if path_length < vision:
+			vision = path_length
+
+		cells = self.shortest[-vision:-1]
+		score = self.grid.get_score(cells)
+		print(cells, score)
+
+		return score != 0
+
 	def find_shortest(self):
+		print("Trying to find route from {} to {}".format(self.start, self.goal))
 		return self.a_star("manhattan")
 
-	def find_safest(self):
-		self.a_start()
+	def avoid(self, avoid_cells):
+		# TODO implement function
+		return None
+
 
 	def a_star(self, distance_method):
 		"""A* path finding algorithm.
@@ -75,11 +96,11 @@ class Route:
 					explored[neighbour_pos] = Position(neighbour_pos)
 					neighbour = explored[neighbour_pos]
 
-				tentative_g_score = current.g_score + get_distance(current.pos, neighbour.pos)
+				tentative_g_score = current.g_score + get_distance(current.pos, neighbour.pos, distance_method)
 				if tentative_g_score < neighbour.g_score:
 					# better score, save new calculated score
 					neighbour.g_score = tentative_g_score
-					neighbour.f_score = tentative_g_score + get_distance(neighbour.pos, self.goal)
+					neighbour.f_score = tentative_g_score + get_distance(neighbour.pos, self.goal, distance_method)
 					neighbour.parent = current
 					if neighbour.pos not in unexplored:
 						unexplored[neighbour.pos] = neighbour

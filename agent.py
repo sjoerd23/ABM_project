@@ -20,7 +20,7 @@ class Customer(Agent):
     """
     EXIT = 99
 
-    def __init__(self, unique_id, model, pos, vaccinated, avoid_radius, len_shoplist):
+    def __init__(self, unique_id, model, pos, vaccinated, avoid_radius, len_shoplist, vision=5):
         super().__init__(unique_id, model)
 
         self.avoid_radius = avoid_radius
@@ -29,6 +29,7 @@ class Customer(Agent):
         self.is_problematic_contact = False
         self.routefinder = None
         self.shop_cor_list = []
+        self.vision = vision
 
         # adds a maximum of len_shoplist items to a shopping list
         shop_list = []
@@ -105,11 +106,22 @@ class Customer(Agent):
 
         # check if route exists, if so move agent towards the goal
         if self.routefinder.shortest:
-            self.model.grid.move_agent(self, self.routefinder.shortest[-1])
-            self.routefinder.shortest.pop()
+
+            # check if goal is within vision
+            if self.routefinder.path_length > self.vision:
+                print(";a;a;a;a;a")
+                # check if there are people in the way
+                if not self.routefinder.check_if_crowded(self.vision):
+                    print("hoi!")
+                    # our path is free! move the agent to the next step
+                    self.model.grid.move_agent(self, self.routefinder.shortest[-1])
+                else:
+                    # there is somebody in our way, check if there is a good alternative
+                    forbidden_cells = self.model.grid.get_forbidden_cells(self.pos, self.vision)
+
 
             # if checkpoint is reached remove checkpoint
-            if len(self.routefinder.shortest) == 0:
+            if self.routefinder.path_length == 0:
                 self.routefinder = None
                 self.shop_cor_list.pop(0)
 

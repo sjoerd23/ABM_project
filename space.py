@@ -26,12 +26,27 @@ class SuperMarketGrid(MultiGrid):
 	def get_score(self, *cells):
 		"""Returns the score value corresponding to the given position."""
 		score = 0
-		for cell in cells:
+		for cell in cells[0]:
 			if cell in self.scores:
 				score += self.scores[cell]
 			else:
 				score += self.default_score
 		return score
+
+	def get_forbidden_cells(self, pos, radius, threshold=0, agent_on_location=False):
+		"""Returns all the cells with a crowded score higher than the given treshold value"""
+		forbidden = []
+		cells = self.get_neighborhood(pos, moore=False, include_center=True, radius=radius)
+		for cell in cells:
+			# correct for the agent's own crowded score if there is a agent on the given location
+			correction = 0
+			if agent_on_location:
+				correction = core.get_distance(pos, cell)
+			if self.get_score(cell) > threshold + correction:
+				forbidden.append(forbidden)
+
+		print(forbidden)
+		return forbidden
 
 	def _add_agent_score(self, agent, new_pos):
 		safe_pos = []
@@ -64,7 +79,6 @@ class SuperMarketGrid(MultiGrid):
 					delta_pos_list = core.BARRIER_DICT[delta_pos]
 					real_pos = list([(pos[0] + delta_pos[0], pos[1] + delta_pos[1]) for delta_pos in delta_pos_list])
 					safe_pos += real_pos
-
 
 		affected_cells = self.get_neighborhood(pos, moore=False, include_center=True, radius=self.avoid_radius)
 		for cell in affected_cells:
