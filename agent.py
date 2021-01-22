@@ -132,6 +132,7 @@ class Customer(Agent):
                     forbidden_cells = self.model.grid.get_forbidden_cells(self.pos, self.vision)
 
 
+
             # if checkpoint is reached remove checkpoint
             if self.routefinder.path_length == 0:
                 self.routefinder = None

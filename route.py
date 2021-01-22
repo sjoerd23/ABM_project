@@ -45,18 +45,19 @@ class Route:
 
 		return possible
 
-	def check_if_crowded(self, vision):
+	def check_if_crowded(self, vision, agent_pos=None):
 		"""Checks if there are people in the way during the next x steps"""
 		path_length = len(self.shortest)
 
 		if path_length < vision:
 			vision = path_length
-
+		print("Hele route", self.shortest)
 		cells = self.shortest[-vision:-1]
+		print("Cells", cells)
 		score = self.grid.get_score(cells)
 		print(cells, score)
-
-		return score != 0
+		# score is always 3 because agent own score
+		return score != 3
 
 	def find_shortest(self):
 		print("Trying to find route from {} to {}".format(self.start, self.goal))

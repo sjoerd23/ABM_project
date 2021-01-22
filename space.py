@@ -39,7 +39,7 @@ class SuperMarketGrid(MultiGrid):
 	def get_score(self, *cells):
 		"""Returns the score value corresponding to the given position."""
 		score = 0
-		for cell in cells:
+		for cell in cells[0]:
 			if cell in self.scores:
 				score += self.scores[cell]
 			else:
@@ -60,7 +60,6 @@ class SuperMarketGrid(MultiGrid):
 
 		print(forbidden)
 		return forbidden
-
 
 	def _add_agent_score(self, agent, new_pos):
 		score_formula = lambda pos, cell: self.avoid_radius - core.get_distance(new_pos, cell, "manhattan") + self.get_score(cell)
