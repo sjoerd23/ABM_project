@@ -57,19 +57,19 @@ class SuperMarketGrid(MultiGrid):
 			correction = 0
 			if agent_on_location:
 				distance = core.get_distance(pos, cell)
-				if distance < 3:
-					correction = 3 - distance
+				if distance <= self.model.AVOID_RADIUS:
+					correction = self.model.AVOID_RADIUS - distance
 			if self.get_score(cell) > threshold - correction:
 				forbidden.append(forbidden)
 
 		return forbidden
 
 	def _add_agent_score(self, agent, new_pos):
-		score_formula = lambda pos, cell: self.avoid_radius - core.get_distance(new_pos, cell, "manhattan") + self.get_score(cell)
+		score_formula = lambda pos, cell: self.avoid_radius - (core.get_distance(new_pos, cell, "manhattan")-1) + self.get_score(cell)
 		self._set_score(agent, new_pos, score_formula)
 
 	def _remove_agent_score(self, agent, pos):
-		score_formula = lambda pos, cell: -self.avoid_radius + core.get_distance(pos, cell, "manhattan") + self.get_score(cell)
+		score_formula = lambda pos, cell: -self.avoid_radius + (core.get_distance(pos, cell, "manhattan")-1) + self.get_score(cell)
 		self._set_score(agent, pos, score_formula)
 
 	def place_agent(self, agent: Agent, pos: Coordinate):
