@@ -13,17 +13,17 @@ import core
 
 
 # https://stackoverflow.com/questions/50786266/writing-dictionary-of-dataframes-to-file
-def saver(dictex):
+def saver(dictex, var_name):
     for key, val in dictex.items():
         val.to_csv("results/data_{}.csv".format(str(key)))
 
-    with open("results/keys.txt", "w") as f: #saving keys to file
+    with open("results/keys_{}.txt".format(str(key)), "w") as f: #saving keys to file
         f.write(str(list(dictex.keys())))
 
 # https://stackoverflow.com/questions/50786266/writing-dictionary-of-dataframes-to-file
-def loader():
+def loader(var_name):
     """Reading data from keys"""
-    with open("results/keys.txt", "r") as f:
+    with open("results/keys_{}.txt".format(var_name), "r") as f:
         keys = eval(f.read())
 
     dictex = {}
@@ -33,10 +33,10 @@ def loader():
     return dictex
 
 
-def analyze_datas():
+def analyze_datas(var_name, n_steps):
 
     # load data
-    datas = loader()
+    datas = loader(var_name)
 
     # analyze data
     for key, value in datas.items():
@@ -55,6 +55,17 @@ def analyze_datas():
         # plt.ylim(0, max(data)+1)
         # plt.show()
 
+def generate_samples(problem, var_name, distinct_samples):
+
+    for i, var in enumerate(problem["names"]):
+        if var_name == var:
+            samples = np.linspace(*problem["bounds"][i], num=distinct_samples)
+
+            if var == "N_customers" or var == "len_shoplist" or var == "vision":
+                samples = np.linspace(*problem['bounds'][i], num=distinct_samples, dtype=int)
+
+            return samples
+
 def main():
 
     # load supermarket floorplan for simulation
@@ -69,47 +80,44 @@ def main():
     }
 
     # Set the repetitions, the amount of steps, and the amount of distinct values per variable
-    # replicates = 15
-    # distinct_samples = 20
-    # n_steps = 500
-
-    replicates = 2
-    distinct_samples = 2
-    n_steps = 5
-
-    # N_customers = 100
-    # vaccination_prop = 0.0
-    # len_shoplist = 1
-    # basic_compliance = 0.2
+    replicates = 20
+    distinct_samples = 20
+    n_steps = 500
 
     time_start = time.time()
-    datas = {}
 
-    for i, var in enumerate(problem["names"]):
-        samples = np.linspace(*problem["bounds"][i], num=distinct_samples)
+    var_name = "N_customers"
+    var_name = "vaccination_prop"
+    var_name = "len_shoplist"
+    var_name = "basic_compliance"
+    var_name = "vision"
 
-        if var == "N_customers" or var == "len_shoplist":
-            samples = np.linspace(*problem['bounds'][i], num=distinct_samples, dtype=int)
+    samples = generate_samples(problem, var_name=var_name, distinct_samples=distinct_samples)
 
-        for sample in samples:
-            for replicate in range(replicates):
-                if var == "N_customers":
-                    model = CovidSupermarketModel(floorplan, width, height, N_customers=sample)
-                # elif var == "len_shoplist":
-                #     model = CovidSupermarketModel(floorplan, width, height, len_shoplist=sample)
-                elif var == "basic_compliance":
-                    model = CovidSupermarketModel(floorplan, width, height, basic_compliance=sample)
+    for sample in samples:
+        print("\nCalculating sample {} = {} out of \n{}".format(var_name, sample, samples))
+        datas = {}
+        for replicate in range(replicates):
+            if var_name == "N_customers":
+                model = CovidSupermarketModel(floorplan, width, height, N_customers=sample)
+            elif var_name == "vaccination_prop":
+                model = CovidSupermarketModel(floorplan, width, height, vaccination_prop=sample)
+            elif var_name == "len_shoplist":
+                model = CovidSupermarketModel(floorplan, width, height, len_shoplist=sample)
+            elif var_name == "basic_compliance":
+                model = CovidSupermarketModel(floorplan, width, height, basic_compliance=sample)
+            elif var_name == "vision":
+                # vision
+                model = CovidSupermarketModel(floorplan, width, height, vision=sample)
 
-                model.run_model(n_steps)
+            model.run_model(n_steps)
 
-                datas["{}_{}_{}".format(var, sample, replicate)] = model.datacollector.get_model_vars_dataframe()
+            datas["{}_{}_{}".format(var_name, sample, replicate)] = model.datacollector.get_model_vars_dataframe()
 
-    # save data
-    saver(datas)
+        # save data
+        saver(datas, var_name)
 
-    print("Total simulation time: {:.2f}s".format(time.time()-time_start))
-
-    analyze_datas()
+    print("\nTotal simulation time: {:.2f}s".format(time.time()-time_start))
 
     return
 
