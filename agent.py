@@ -118,7 +118,6 @@ class Customer(Agent):
 
         # check if route exists, if so move agent towards the goal
         if self.routefinder.shortest:
-
             # check if there are people in the way
             if not self.routefinder.check_if_crowded(self.vision, self.pos):
                 # our path is free! move the agent to the next step
@@ -135,10 +134,12 @@ class Customer(Agent):
                     alternative_route = route.Route(self.model, self.pos, self.shop_cor_list[0], self.model.grid, forbidden_type=[Obstacle], forbidden_cells=forbidden_cells)
                     # check if a alternative route was found
                     if alternative_route.shortest:
-                        # print("Choosing alternative route")
-                        # print("Old route", self.routefinder.shortest)
-                        self.routefinder = alternative_route
+                        alternative_score = self.alternative.path_length * self.get_path_multiplier()
+                        current_score = self.routefinder.path_lenght +
                         # print("New route", self.routefinder.shortest)
+
+                        self.routefinder = alternative_route
+
                         self.routefinder.move_agent(self)
                     else:
                         self.routefinder.move_agent(self)

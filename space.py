@@ -62,7 +62,6 @@ class SuperMarketGrid(MultiGrid):
 			if self.get_score(cell) > threshold + correction:
 				forbidden.append(cell)
 
-		print("Forbidden cells", forbidden)
 		return forbidden
 
 	def _add_agent_score(self, agent, new_pos):
