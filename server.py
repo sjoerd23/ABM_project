@@ -36,12 +36,15 @@ class CanvasGrid2(CanvasGrid):
 def agent_portrayal(agent):
     portrayal = {}
     if type(agent) == Customer:
-        portrayal = {"Shape": "circle",
+        portrayal = {"Shape": "arrowHead",
                      "Filled": "true",
                      "color": "yellow",
                      "Layer":   0,
-                     "r": 0.9,
+                     "heading_x": (-1, -1),
+                     "heading_y": -1,
+                     "scale": 0.5,
                      "text_color": "white"}
+
         if agent.vaccinated:
             portrayal["Color"] = "green"
         else:
@@ -60,6 +63,36 @@ def agent_portrayal(agent):
                      "text_color": "white"}
     return portrayal
 
+
+
+#
+#
+# def agent_portrayal(agent):
+#     portrayal = {}
+#     if type(agent) == Customer:
+#         portrayal = {"Shape": "circle",
+#                      "Filled": "true",
+#                      "color": "yellow",
+#                      "Layer":   0,
+#                      "r": 0.9,
+#                      "text_color": "white"}
+#         if agent.vaccinated:
+#             portrayal["Color"] = "green"
+#         else:
+#             if agent.is_problematic_contact:
+#                 portrayal["Color"] = "red"
+#             else:
+#                 portrayal["Color"] = "blue"
+#
+#     elif type(agent) == Obstacle:
+#         portrayal = {"Shape": "rect",
+#                      "Color": "black",
+#                      "Filled": "true",
+#                      "Layer": 0,
+#                      "w": 1,
+#                      "h": 1,
+#                      "text_color": "white"}
+#     return portrayal
 
 # load supermarket floorplan for simulation
 floorplan = core.load_floorplan("data/albert_excel_test.csv")
