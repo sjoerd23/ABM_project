@@ -46,7 +46,7 @@ class Customer(Agent):
 
         shop_list.sort()
 
-        # edit shoppinglist according to location agent was spawned in
+        # edit shoppinglist according to location ag ent was spawned in
         # 100 is the precise difference between the number used for a shelve, and the number used for an empty are near a shelve
         spawn_value = int(self.model.floorplan[self.pos[0]][self.pos[1]]) - self.model.SHELF_THRESHOLD
 
