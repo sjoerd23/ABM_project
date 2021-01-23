@@ -119,7 +119,7 @@ class CovidSupermarketModel(Model):
         else:
             vaccinated = False
 
-        new_agent = Customer(self.next_id(), self, pos, self.AVOID_RADIUS, 0, self.len_shoplist, 0, vaccinated)
+        new_agent = Customer(self.next_id(), self, pos, self.AVOID_RADIUS, 0, self.len_shoplist, 0, 0, vaccinated, vision=3)
         self.grid.place_agent(new_agent, pos)
         self.schedule.add(new_agent)
         self.customers.append(new_agent)

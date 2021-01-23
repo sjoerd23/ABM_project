@@ -20,16 +20,16 @@ class Customer(Agent):
     EXIT = 99
 
     def __init__(
-        self, unique_id, model, pos, avoid_radius, basic_compliance, len_shoplist, patience,
+        self, unique_id, model, pos, avoid_radius, basic_compliance, len_shoplist, patience, personal_compliance,
         vaccinated, vision=5
     ):
         super().__init__(unique_id, model)
-
 
         self.avoid_radius = avoid_radius
         self.basic_compliance = basic_compliance
         self.is_problematic_contact = False
         self.patience = patience
+        self.personal_compliance = personal_compliance
         self.pos = pos
         self.routefinder = None
         self.shop_cor_list = []
@@ -69,7 +69,7 @@ class Customer(Agent):
 
     def get_path_multiplier(self):
         """Calculates multiplier for alternative path B"""
-        total_multiplier = (1 - self.patience) + (1 - self.basic_compliance)
+        total_multiplier = (1 - self.patience) + (1 - self.basic_compliance) + (1 - self.personal_compliance)
         if self.vaccinated:
             total_multiplier += 1
         return total_multiplier
