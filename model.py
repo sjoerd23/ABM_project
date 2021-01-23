@@ -126,7 +126,7 @@ class CovidSupermarketModel(Model):
 
         new_agent = Customer(
             self.next_id(), self, pos, self.AVOID_RADIUS, self.basic_compliance, self.len_shoplist,
-            self.random.random(), self.random.random(), vaccinated, vision=3
+            self.random.random(), self.random.random(), vaccinated, vision=self.vision
         )
         self.grid.place_agent(new_agent, pos)
         self.schedule.add(new_agent)

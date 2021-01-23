@@ -69,9 +69,13 @@ def main():
     }
 
     # Set the repetitions, the amount of steps, and the amount of distinct values per variable
-    replicates = 15
-    distinct_samples = 20
-    n_steps = 500
+    # replicates = 15
+    # distinct_samples = 20
+    # n_steps = 500
+
+    replicates = 2
+    distinct_samples = 2
+    n_steps = 5
 
     # N_customers = 100
     # vaccination_prop = 0.0

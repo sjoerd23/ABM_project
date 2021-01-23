@@ -1,4 +1,5 @@
 import csv
+from scipy.stats import truncnorm
 
 BARRIER_DICT = {
 	(0, 1): [(0, 2), (0, 3), (-1, 2), (1, 2)],
@@ -44,3 +45,7 @@ def load_floorplan(map):
             for i in range(grid_len):
                 grid[i].insert(0, row[i])
     return grid
+
+
+def get_truncated_normal(mean=0.5, sd=1/3, low=0, upp=1):
+    return truncnorm((low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd).rvs()

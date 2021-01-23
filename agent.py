@@ -1,4 +1,5 @@
 from mesa import Model, Agent
+
 import route
 
 
@@ -29,6 +30,7 @@ class Customer(Agent):
         self.basic_compliance = basic_compliance
         self.is_problematic_contact = False
         self.patience = patience
+        self.patience_0 = patience # patience op t=0
         self.personal_compliance = personal_compliance
         self.pos = pos
         self.routefinder = None
@@ -68,11 +70,15 @@ class Customer(Agent):
         self.shop_cor_list.append(self.random.choice(exit_list))
 
     def get_path_multiplier(self):
-        """Calculates multiplier for alternative path B"""
+        """Calculates multiplier for alternative path B
+
+        Returns:
+            total_multiplier: [0, 1.3]
+        """
         total_multiplier = (1 - self.patience) + (1 - self.basic_compliance) + (1 - self.personal_compliance)
         if self.vaccinated:
             total_multiplier += 1
-        return total_multiplier/3
+        return total_multiplier/2
 
     def permute_shopping_list(self, n_permutations):
         if len(self.shop_cor_list) > 1:
@@ -127,8 +133,14 @@ class Customer(Agent):
             else:
                 # our path is crowded, check if goal is within vision
                 if self.routefinder.path_length < self.vision:
-                    # patience thingy
-                    self.routefinder.move_agent(self)
+                    if self.patience <= 0 or self.is_problematic_contact:
+                        self.routefinder.move_agent(self)
+                        self.patience = self.patience_0 * 0.9
+                        self.patience_0 = self.patience
+                    else:
+                        self.patience -= 0.1
+                        if self.patience < 0:
+                            self.patience = 0
                 else:
                     # still far away from goal
                     forbidden_cells = self.model.grid.get_forbidden_cells(self.pos, self.vision)
