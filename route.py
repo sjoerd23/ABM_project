@@ -73,12 +73,11 @@ class Route:
 			score += self.grid.get_score(cell) - correction
 		# print(cells, score)
 		# score is always 3 because agent own score
-		return score > 0
+		return score
 
 	def find_shortest(self):
 		# print("Trying to find route from {} to {}".format(self.start, self.goal))
 		return self.a_star("manhattan")
-
 
 	def a_star(self, distance_method):
 		"""A* path finding algorithm.

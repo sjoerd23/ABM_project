@@ -33,8 +33,8 @@ class CovidSupermarketModel(Model):
     AVOID_RADIUS = 3
 
     def __init__(
-        self, floorplan, width, height, N_customers=100, vaccination_prop=0, len_shoplist=10,
-        basic_compliance=0.2
+        self, floorplan, width, height, N_customers=100, vaccination_prop=0.2, len_shoplist=10,
+        basic_compliance=0.2, vision=3
     ):
         super().__init__()
 
@@ -46,6 +46,7 @@ class CovidSupermarketModel(Model):
         self.vaccination_prop = vaccination_prop
         self.len_shoplist = len_shoplist
         self.basic_compliance = basic_compliance
+        self.vision = vision
 
         self.customers = []
         self.exit_list = []
