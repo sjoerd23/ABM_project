@@ -21,7 +21,7 @@ class Customer(Agent):
 
     def __init__(
         self, unique_id, model, pos, avoid_radius, basic_compliance, len_shoplist, patience, personal_compliance,
-        vaccinated, vision=5
+        vaccinated, vision=3
     ):
         super().__init__(unique_id, model)
 
@@ -72,7 +72,7 @@ class Customer(Agent):
         total_multiplier = (1 - self.patience) + (1 - self.basic_compliance) + (1 - self.personal_compliance)
         if self.vaccinated:
             total_multiplier += 1
-        return total_multiplier
+        return total_multiplier/3
 
     def permute_shopping_list(self, n_permutations):
         if len(self.shop_cor_list) > 1:
@@ -119,7 +119,8 @@ class Customer(Agent):
         # check if route exists, if so move agent towards the goal
         if self.routefinder.shortest:
             # check if there are people in the way
-            if not self.routefinder.check_if_crowded(self.vision, self.pos):
+            crowded = self.routefinder.check_if_crowded(self.vision, self.pos)
+            if not crowded:
                 # our path is free! move the agent to the next step
                 self.routefinder.move_agent(self)
 
@@ -134,15 +135,16 @@ class Customer(Agent):
                     alternative_route = route.Route(self.model, self.pos, self.shop_cor_list[0], self.model.grid, forbidden_type=[Obstacle], forbidden_cells=forbidden_cells)
                     # check if a alternative route was found
                     if alternative_route.shortest:
-                        alternative_score = self.alternative.path_length * self.get_path_multiplier()
-                        current_score = self.routefinder.path_lenght +
-                        # print("New route", self.routefinder.shortest)
+                        alternative_score = alternative_route.path_length * self.get_path_multiplier()
+                        current_score = self.routefinder.path_length + crowded
 
-                        self.routefinder = alternative_route
+                        print("alternative score {} * {} = {}".format(alternative_route.path_length, self.get_path_multiplier(), alternative_score))
+                        print("Current score {} + {} = {}".format(self.routefinder.path_length, crowded, current_score))
+                        if alternative_score < current_score:
+                            self.routefinder = alternative_route
+                            self.patience *= 0.95
 
-                        self.routefinder.move_agent(self)
-                    else:
-                        self.routefinder.move_agent(self)
+                    self.routefinder.move_agent(self)
 
             # if checkpoint is reached remove checkpoint
             if self.routefinder.path_length == 0:
