@@ -32,7 +32,10 @@ class CovidSupermarketModel(Model):
     SHELF_THRESHOLD = 100
     AVOID_RADIUS = 3
 
-    def __init__(self, floorplan, width, height, N_customers=100, vaccination_prop=0, len_shoplist=10):
+    def __init__(
+        self, floorplan, width, height, N_customers=100, vaccination_prop=0, len_shoplist=10,
+        basic_compliance=0.2
+    ):
         super().__init__()
 
         # init basic properties
@@ -42,6 +45,7 @@ class CovidSupermarketModel(Model):
         self.N_customers = N_customers
         self.vaccination_prop = vaccination_prop
         self.len_shoplist = len_shoplist
+        self.basic_compliance = basic_compliance
 
         self.customers = []
         self.exit_list = []
