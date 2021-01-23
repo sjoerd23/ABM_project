@@ -12,15 +12,19 @@ class Position:
 
 class Route:
 
-	def __init__(self, model, start, goal, grid, forbidden=[]):
+	def __init__(self, model, start, goal, grid, forbidden_type=[], forbidden_cells=[]):
 		self.model = model
 		self.start = start
 		self.goal = goal
 		self.steps = []
 		self.grid = grid
-		self.forbidden = forbidden
+		self.forbidden_type = forbidden_type
+		self.forbidden_cells = forbidden_cells
 		self.shortest = self.find_shortest()
-		self.path_length = len(self.shortest)
+		if self.shortest:
+			self.path_length = len(self.shortest)
+		else:
+			self.path_length = None
 
 	def move_agent(self, agent):
 		"""Moves the agent to the next step, updates the list and self.path_lenght"""
@@ -28,16 +32,21 @@ class Route:
 		self.shortest.pop()
 		self.path_length -= 1
 
-	def get_possible_neighborhood(self, pos):
+	def get_possible_neighborhood(self, pos, forbidden_cells=[]):
 		"""Returns all the possible locations to walk to."""
 		possible = []
 		candidates = self.grid.get_neighborhood(pos, False, radius=1)
 
 		for candidate in candidates:
+			# check if the cell position is in the forbidden location list
+			if candidate in forbidden_cells:
+				continue
+
 			content_list = self.grid.get_cell_list_contents(candidate)
 			valid = True
 			for content in content_list:
-				if type(content) in self.forbidden:
+				# check if the agent type is in the forbidden agent type list
+				if type(content) in self.forbidden_type:
 					valid = False
 					continue
 			if valid:
@@ -57,19 +66,18 @@ class Route:
 		for cell in cells:
 			correction = 0
 			if agent_pos:
-				correction = get_distance(agent_pos, cell)
+				distance = get_distance(agent_pos, cell)
+				if distance <= self.model.AVOID_RADIUS:
+					correction = self.model.AVOID_RADIUS + 1 - distance
+
 			score += self.grid.get_score(cell) - correction
-		print(cells, score)
+		# print(cells, score)
 		# score is always 3 because agent own score
 		return score > 0
 
 	def find_shortest(self):
-		print("Trying to find route from {} to {}".format(self.start, self.goal))
+		# print("Trying to find route from {} to {}".format(self.start, self.goal))
 		return self.a_star("manhattan")
-
-	def avoid(self, avoid_cells):
-		# TODO implement function
-		return None
 
 
 	def a_star(self, distance_method):
@@ -98,7 +106,7 @@ class Route:
 			unexplored.pop(current.pos)
 
 			# check all the neighbours
-			for neighbour_pos in self.get_possible_neighborhood(current.pos):
+			for neighbour_pos in self.get_possible_neighborhood(current.pos, self.forbidden_cells):
 				if neighbour_pos in explored:
 					neighbour = explored[neighbour_pos]
 				else:

@@ -32,7 +32,10 @@ class CovidSupermarketModel(Model):
     SHELF_THRESHOLD = 100
     AVOID_RADIUS = 3
 
-    def __init__(self, floorplan, width, height, N_customers=100, vaccination_prop=0, len_shoplist=10):
+    def __init__(
+        self, floorplan, width, height, N_customers=100, vaccination_prop=0, len_shoplist=10,
+        basic_compliance=0.2
+    ):
         super().__init__()
 
         # init basic properties
@@ -42,6 +45,7 @@ class CovidSupermarketModel(Model):
         self.N_customers = N_customers
         self.vaccination_prop = vaccination_prop
         self.len_shoplist = len_shoplist
+        self.basic_compliance = basic_compliance
 
         self.customers = []
         self.exit_list = []
@@ -119,7 +123,10 @@ class CovidSupermarketModel(Model):
         else:
             vaccinated = False
 
-        new_agent = Customer(self.next_id(), self, pos, self.AVOID_RADIUS, 0, self.len_shoplist, 0, vaccinated)
+        new_agent = Customer(
+            self.next_id(), self, pos, self.AVOID_RADIUS, self.basic_compliance, self.len_shoplist,
+            self.random.random(), self.random.random(), vaccinated, vision=3
+        )
         self.grid.place_agent(new_agent, pos)
         self.schedule.add(new_agent)
         self.customers.append(new_agent)

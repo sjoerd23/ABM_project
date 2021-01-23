@@ -48,7 +48,7 @@ class SuperMarketGrid(MultiGrid):
 				score += self.default_score
 		return score
 
-	def get_forbidden_cells(self, pos, radius, threshold=0, agent_on_location=False):
+	def get_forbidden_cells(self, pos, radius, threshold=0, agent_on_location=True):
 		"""Returns all the cells with a crowded score higher than the given threshold value"""
 		forbidden = []
 		cells = self.get_neighborhood(pos, moore=False, include_center=True, radius=radius)
@@ -57,21 +57,19 @@ class SuperMarketGrid(MultiGrid):
 			correction = 0
 			if agent_on_location:
 				distance = core.get_distance(pos, cell)
-				if distance < 3:
-					correction = 3 - distance
-					print(correction)
+				if distance <= self.avoid_radius:
+					correction = self.avoid_radius + 1 - distance
 			if self.get_score(cell) > threshold + correction:
-				forbidden.append(forbidden)
+				forbidden.append(cell)
 
-		print(forbidden)
 		return forbidden
 
 	def _add_agent_score(self, agent, new_pos):
-		score_formula = lambda pos, cell: self.avoid_radius - core.get_distance(new_pos, cell, "manhattan") + self.get_score(cell)
+		score_formula = lambda pos, cell: self.avoid_radius - (core.get_distance(new_pos, cell, "manhattan")-1) + self.get_score(cell)
 		self._set_score(agent, new_pos, score_formula)
 
 	def _remove_agent_score(self, agent, pos):
-		score_formula = lambda pos, cell: -self.avoid_radius + core.get_distance(pos, cell, "manhattan") + self.get_score(cell)
+		score_formula = lambda pos, cell: -self.avoid_radius + (core.get_distance(pos, cell, "manhattan")-1) + self.get_score(cell)
 		self._set_score(agent, pos, score_formula)
 
 	def place_agent(self, agent: Agent, pos: Coordinate):
