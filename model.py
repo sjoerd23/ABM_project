@@ -188,7 +188,7 @@ class CovidSupermarketModel(Model):
 
     def run_model(self, n_steps=200):
         """Run model for n_steps"""
-        for i in tqdm.tqdm(range(n_steps)):
+        for i in range(n_steps):
             self.step()
 
     def step(self):
