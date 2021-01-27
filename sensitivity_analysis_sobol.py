@@ -67,7 +67,7 @@ def main():
     n_steps = 500       # 500
 
     #### SET SAMPLE INDEX ####
-    sample_index = 0
+    sample_index = 1
 
     # make sure a correct index is given
     print("\nWARNING! MAKE SURE TO SELECT THE APPROPIATE sample_index!!!\n")
