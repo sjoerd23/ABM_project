@@ -67,7 +67,7 @@ def main():
     n_steps = 500       # 500
 
     #### SET SAMPLE INDEX ####
-    sample_index = 0
+    sample_index = 1
 
     # make sure a correct index is given
     print("\nWARNING! MAKE SURE TO SELECT THE APPROPIATE sample_index!!!\n")
@@ -92,65 +92,65 @@ def main():
 
     time_start = time.time()
 
-    count = 0
-    for i, vals in enumerate(params):
-
-        # change parameters that should be integers i.e. index 0, 2, 4
-        vals = list(vals)
-        vals[0] = int(vals[0])
-        vals[2] = int(vals[2])
-        vals[4] = int(vals[4])
-
-        print("Progress: {:.2%}".format(float(i)/len(params)))
-        print("Calculating sample {}".format(vals))
-
-        model = CovidSupermarketModel(
-            floorplan, width, height, vals[0], vals[1], vals[2], vals[3], vals[4]
-        )
-        model.run_model(n_steps)
-
-        data_run = model.datacollector.get_model_vars_dataframe()
-        data_run_n_problematic_contacts = data_run.iloc[-1]
-        data_run_n_problematic_contacts_mean = np.mean(data_run["n_problematic_contacts"])
-        data_run_n_problematic_contacts_mean_100 = np.mean(data_run["n_problematic_contacts"][100:])
-
-        data.iloc[count, 5] = count
-        data.iloc[count, 6] = int(data_run_n_problematic_contacts)
-        data.iloc[count, 7] = float(data_run_n_problematic_contacts_mean)
-        data.iloc[count, 8] = float(data_run_n_problematic_contacts_mean_100)
-        data.iloc[count, 0:5] = vals
-
-        # save dataframe each iteration to prevent losing data. If all goes well, then only the last
-        # saved dataframe should be used for analysis
-        data.to_csv("results/Sobol/data_{}_{}.csv".format(params[0], count))
-        count += 1
+    # count = 0
+    # for i, vals in enumerate(params):
+    #
+    #     # change parameters that should be integers i.e. index 0, 2, 4
+    #     vals = list(vals)
+    #     vals[0] = int(vals[0])
+    #     vals[2] = int(vals[2])
+    #     vals[4] = int(vals[4])
+    #
+    #     print("Progress: {:.2%}".format(float(i)/len(params)))
+    #     print("Calculating sample {}".format(vals))
+    #
+    #     model = CovidSupermarketModel(
+    #         floorplan, width, height, vals[0], vals[1], vals[2], vals[3], vals[4]
+    #     )
+    #     model.run_model(n_steps)
+    #
+    #     data_run = model.datacollector.get_model_vars_dataframe()
+    #     data_run_n_problematic_contacts = data_run.iloc[-1]
+    #     data_run_n_problematic_contacts_mean = np.mean(data_run["n_problematic_contacts"])
+    #     data_run_n_problematic_contacts_mean_100 = np.mean(data_run["n_problematic_contacts"][100:])
+    #
+    #     data.iloc[count, 5] = count
+    #     data.iloc[count, 6] = int(data_run_n_problematic_contacts)
+    #     data.iloc[count, 7] = float(data_run_n_problematic_contacts_mean)
+    #     data.iloc[count, 8] = float(data_run_n_problematic_contacts_mean_100)
+    #     data.iloc[count, 0:5] = vals
+    #
+    #     # save dataframe each iteration to prevent losing data. If all goes well, then only the last
+    #     # saved dataframe should be used for analysis
+    #     data.to_csv("results/Sobol/data_{}_{}.csv".format(params[0], count))
+    #     count += 1
 
     # This is just for analyzing. Comment when doing the actual runs
-    # # Unnamed column is the original index column of the original dataframe
-    # data_analyze = pd.DataFrame(
-    #     index=range(0),
-    #     columns=[
-    #         "N_customers", "vaccination_prop", "len_shoplist", "basic_compliance", "vision", "run",
-    #         "n_problematic_contacts", "n_problematic_contacts_mean",
-    #         "n_problematic_contacts_mean_100"
-    #     ]
-    # )
-    # datas = []
-    # for i in range(5):
-    #     data_params = generate_samples(problem, distinct_samples, i)
-    #     data_count = len(data_params) - 1
-    #     datas.append(pd.read_csv("results/Sobol/data_{}_{}.csv".format(data_params[0], data_count)))
-    #
-    # data = pd.concat([data_analyze, datas[0], datas[1], datas[2], datas[3], datas[4]], ignore_index=True, sort=False)
-    #
-    # Si_problematic_contacts = sobol.analyze(problem, data["n_problematic_contacts"].values, calc_second_order=False, print_to_console=True)
-    #
-    # plot_index(Si_problematic_contacts, problem["names"], "1", "First order sensitivity")
-    #
-    # # Total order
-    # plot_index(Si_problematic_contacts, problem["names"], "T", "Total order sensitivity")
-    #
-    # plt.show()
+    # Unnamed column is the original index column of the original dataframe
+    data_analyze = pd.DataFrame(
+        index=range(0),
+        columns=[
+            "N_customers", "vaccination_prop", "len_shoplist", "basic_compliance", "vision", "run",
+            "n_problematic_contacts", "n_problematic_contacts_mean",
+            "n_problematic_contacts_mean_100"
+        ]
+    )
+    datas = []
+    for i in range(5):
+        data_params = generate_samples(problem, distinct_samples, i)
+        data_count = len(data_params) - 1
+        datas.append(pd.read_csv("results/Sobol/data_{}_{}.csv".format(data_params[0], data_count)))
+
+    data = pd.concat([data_analyze, datas[0], datas[1], datas[2], datas[3], datas[4]], ignore_index=True, sort=False)
+
+    Si_problematic_contacts = sobol.analyze(problem, data["n_problematic_contacts_mean"].values, calc_second_order=False, print_to_console=True)
+
+    plot_index(Si_problematic_contacts, problem["names"], "1", "First order sensitivity")
+
+    # Total order
+    plot_index(Si_problematic_contacts, problem["names"], "T", "Total order sensitivity")
+
+    plt.show()
 
     print("\nTotal simulation time: {:.2f}s".format(time.time()-time_start))
 

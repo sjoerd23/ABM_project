@@ -150,8 +150,6 @@ class Customer(Agent):
                         alternative_score = alternative_route.path_length * self.get_path_multiplier()
                         current_score = self.routefinder.path_length + crowded
 
-                        # print("alternative score {} * {} = {}".format(alternative_route.path_length, self.get_path_multiplier(), alternative_score))
-                        # print("Current score {} + {} = {}".format(self.routefinder.path_length, crowded, current_score))
                         if alternative_score < current_score:
                             self.routefinder = alternative_route
                             self.patience *= 0.95

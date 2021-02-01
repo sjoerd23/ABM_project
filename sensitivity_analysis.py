@@ -86,10 +86,6 @@ def main():
 
     time_start = time.time()
 
-    var_name = "N_customers"
-    var_name = "vaccination_prop"
-    var_name = "len_shoplist"
-    var_name = "basic_compliance"
     var_name = "vision"
 
     samples = generate_samples(problem, var_name=var_name, distinct_samples=distinct_samples)
