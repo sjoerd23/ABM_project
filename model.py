@@ -206,5 +206,3 @@ class CovidSupermarketModel(Model):
         # calculate number of problematic contacts
         self.problematic_contacts()
         self.datacollector.collect(self)
-
-        # print("Total time last step: {:2f}s".format(time.time()-time_start))
