@@ -179,13 +179,13 @@ class CovidSupermarketModel(Model):
                                     self.n_problematic_contacts += 1
 
                                     neighbor.is_problematic_contact = True
-                                    print("haller")
+
                                     if not self.heatgrid[neighbor.pos[0]][neighbor.pos[1]]:
                                         self.heatgrid[neighbor.pos[0]][neighbor.pos[1]] = 0.5
                                     else:
                                         self.heatgrid[neighbor.pos[0]][neighbor.pos[1]] += 0.5
                                         print(self.heatgrid[neighbor.pos[0]][neighbor.pos[1]])
-                                        print("hello")
+                                        print(neighbor.pos, "contat value")
 
                                     # take the agent
         # divide by 2, because we count contacts double

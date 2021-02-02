@@ -41,12 +41,23 @@ class CanvasHeatGrid(CanvasGrid):
 
     def render(self, model):
         grid_state = defaultdict(list)
+
+        high_cont_val = 0
+
+        # determine what the maximum value of problematic contacts is which can be used for scaling the colours of a heatmap.
+        for x in range(model.heatgrid.width):
+            for y in range(model.heatgrid.height):
+                if isinstance(model.heatgrid[x][y], float):
+                    if model.heatgrid[x][y] > high_cont_val:
+                        high_cont_val = model.heatgrid[x][y]
+
         for x in range(model.heatgrid.width):
             for y in range(model.heatgrid.height):
                 if isinstance(model.heatgrid[x][y], float):
 
-
-                    portrayal = {"Shape": "rect", "Color": "red", "Filled": "true", "Layer": 0,
+                    cell_color = color_gradient(high_cont_val, model.heatgrid[x][y])
+                    print(cell_color, "cell color")
+                    portrayal = {"Shape": "rect", "Color": cell_color, "Filled": "true", "Layer": 0,
                                  "w": 1, "h": 1, "text": model.heatgrid[x][y], "text_color": "black", "x": x, "y": y}
                     grid_state[portrayal["Layer"]].append(portrayal)
                 else:
@@ -92,6 +103,73 @@ def agent_portrayal(agent):
                      "h": 1,
                      "text_color": "white"}
     return portrayal
+
+
+
+
+color_dict = {
+    0.02: "#fef5f3",
+    0.04: "#fdefeb",
+    0.06: "#fde8e3",
+    0.08	: "#fde2dc",
+    0.10	: "#fcdcd4",
+    0.12	: "#fcd6cc",
+    0.14	: "#fbcfc4",
+    0.16	: "#fbc9bd",
+    0.18	: "#fbc3b5",
+    0.20	: "#fabcad",
+    0.22	: "#fab6a5",
+    0.24	: "#f9b09e",
+    0.26	: "#f9aa96",
+    0.28	: "#f8a38e",
+    0.30	: "#f89d87",
+    0.32	: "#f8977f",
+    0.34	: "#f79077",
+    0.36	: "#f78a6f",
+    0.38	: "#f68468",
+    0.40	: "#f67e60",
+    0.42	: "#f57758",
+    0.44	: "#f57150",
+    0.46	: "#f56b49",
+    0.48	: "#f46441",
+    0.50	: "#f45e39",
+    0.52	: "#f35831",
+    0.54	: "#f3522a",
+    0.56	: "#f34b22",
+    0.58	: "#f2451a",
+    0.60	: "#f23f12",
+    0.62	: "#ef390c",
+    0.64	: "#e8380c",
+    0.66	: "#e0360c",
+    0.68	: "#d8340b",
+    0.70	: "#d0320b",
+    0.72	: "#c9300a",
+    0.74	: "#c12e0a",
+    0.76	: "#b92c0a",
+    0.78	: "#b22b09",
+    0.80	: "#aa2909",
+    0.82	: "#a22708",
+    0.84	: "#9a2508",
+    0.86	: "#932307",
+    0.88	: "#8b2107",
+    0.90	: "#831f07",
+    0.92	: "#7b1d06",
+    0.94	: "#741c06",
+    0.96	: "#6c1a05",
+    0.98	: "#641805",
+    1.00	: "#5c1605"
+}
+
+#
+
+def color_gradient(high_cont_val, cell_val):
+    frac_cont = cell_val / high_cont_val
+
+    for i in range(1, 51):
+        if i * 0.02 >= frac_cont:
+            color_key = i * 0.02
+            print(color_key, "color key")
+            return color_dict.get(round(color_key, 2))
 
 
 
