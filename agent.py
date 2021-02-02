@@ -10,15 +10,30 @@ class Customer(Agent):
         unique_id (int): a unique identifier for this agent
         model: model object this agent is part of
         pos (x, y): positon of agent on grid
+        avoid_radius (int): radius in grid units in which customers try to avoid each other
+        basic_compliance (float <- [0, 1]): basic level of compliance, higher is more compliant
+        len_shoplist (int <- min. 0): amount of items to place on shopping list
+        patience (float <- [0, 1]): patience of agent, higher is more patient
+        personal_compliance (float <- [0, 1]): personal level compliance, higher is more compliant
         vaccinated (bool): if the customer is vaccinated or not
+        vision (int <- min. 3): amount of grid cells customer can see other customers
 
     Attributes:
+        unique_id (int): a unique identifier for this agent
+        model: model object this agent is part of
         pos (x, y): positon of agent on grid
-        vaccinated (bool): if the customer is vaccinated or not
         is_problematic_contact (bool): if agent is currently in avoid_radius of other agent
+        avoid_radius (int): radius in grid units in which customers try to avoid each other
+        basic_compliance (float <- [0, 1]): basic level of compliance, higher is more compliant
+        len_shoplist (int <- min. 0): amount of items to place on shopping list
+        patience (float <- [0, 1]): patience of agent, higher is more patient
+        patience_0 (float <- [0, 1]): patience of agent on t=0, higher is more patient
+        personal_compliance (float <- [0, 1]): personal level compliance, higher is more compliant
+        vaccinated (bool): if the customer is vaccinated or not
+        vision (int <- min. 3): amount of grid cells customer can see other customers
 
     """
-    EXIT = 99
+    EXIT = 99   # grid cell value of exit of supermarket grid
 
     def __init__(
         self, unique_id, model, pos, avoid_radius, basic_compliance, len_shoplist, patience,
@@ -26,9 +41,9 @@ class Customer(Agent):
     ):
         super().__init__(unique_id, model)
 
+        self.is_problematic_contact = False
         self.avoid_radius = avoid_radius
         self.basic_compliance = basic_compliance
-        self.is_problematic_contact = False
         self.patience = patience
         self.patience_0 = patience # patience op t=0
         self.personal_compliance = personal_compliance
