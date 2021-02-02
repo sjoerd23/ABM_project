@@ -1,7 +1,6 @@
 import time
 import csv
 import numpy as np
-import matplotlib.pyplot as plt
 import SALib
 from SALib.sample import saltelli
 from SALib.analyze import sobol
