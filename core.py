@@ -32,7 +32,7 @@ def get_distance(start, end, d="manhattan"):
 
 	Raises:
 		ValueError: if metric d is not supported
-		
+
 	"""
 	(a1, a2) = start
 	(b1, b2) = end
@@ -51,7 +51,15 @@ def get_distance(start, end, d="manhattan"):
 
 
 def load_floorplan(map):
-    """Load the floorplan of a supermarket layout specified in map"""
+    """Load the floorplan of a supermarket layout specified in map
+
+	Args:
+		map (csv): csv file containing layout of supermarket
+
+	Returns:
+		grid (2D list): grid with corresponding values of input map
+
+	"""
     grid = []
     with open(map, encoding='utf-8-sig', newline="") as file:
         reader = csv.reader(file)
