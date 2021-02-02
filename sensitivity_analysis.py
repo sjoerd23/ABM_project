@@ -1,62 +1,42 @@
 import time
 import csv
 import numpy as np
-import matplotlib.pyplot as plt
 import SALib
 from SALib.sample import saltelli
 from SALib.analyze import sobol
 import pandas as pd
-from mesa.batchrunner import BatchRunner
 
 from model import CovidSupermarketModel
 import core
 
 
-# https://stackoverflow.com/questions/50786266/writing-dictionary-of-dataframes-to-file
-def saver(dictex, var_name):
+def saver(dictex):
+    """Save dictionary of pandas dataframes. Based on code from stackoverflow:
+    https://stackoverflow.com/questions/50786266/writing-dictionary-of-dataframes-to-file.
+
+    Args:
+        dictex (dict): dict of pandas dataframes
+
+    """
     for key, val in dictex.items():
         val.to_csv("results/data_{}.csv".format(str(key)))
 
     with open("results/keys_{}.txt".format(str(key)), "w") as f: #saving keys to file
         f.write(str(list(dictex.keys())))
 
-# https://stackoverflow.com/questions/50786266/writing-dictionary-of-dataframes-to-file
-def loader(var_name):
-    """Reading data from keys"""
-    with open("results/keys_{}.txt".format(var_name), "r") as f:
-        keys = eval(f.read())
-
-    dictex = {}
-    for key in keys:
-        dictex[key] = pd.read_csv("results/data_{}.csv".format(str(key)))
-
-    return dictex
-
-
-def analyze_datas(var_name, n_steps):
-
-    # load data
-    datas = loader(var_name)
-
-    # analyze data
-    for key, value in datas.items():
-        data = value.to_numpy().flatten()
-        print(data)
-        stat_data = data[0:]
-        mean = np.mean(stat_data)
-        stddev = (1.96 * np.std(stat_data, ddof=1)) / np.sqrt(n_steps)
-        print("Problematic contacts: {:.2f}+-{:.2f}".format(mean, stddev))
-
-        # plt.figure()
-        # plt.title("Number of problematic contacts {} customers".format(N_customers))
-        # plt.scatter([j for j in range(len(data))], data)
-        # plt.xlabel("Time (steps)")
-        # plt.ylabel("Number of problematic contacts")
-        # plt.ylim(0, max(data)+1)
-        # plt.show()
 
 def generate_samples(problem, var_name, distinct_samples):
+    """Generate samples for var_name for given problem
 
+    Args:
+        problem (dict): dict of parameters of the model and their bounds
+        var_name (string): name of parameter to vary for OFAT SA
+        distinct_samples (int): number of distinct samples per parameter for OFAT SA
+
+    Returns:
+        samples (np array): array of maximal distinct_samples parameter values
+
+    """
     for i, var in enumerate(problem["names"]):
         if var_name == var:
             samples = np.linspace(*problem["bounds"][i], num=distinct_samples)
@@ -76,7 +56,7 @@ def main():
     problem = {
     "num_vars": 5,
     "names": ["N_customers", "vaccination_prop", "len_shoplist", "basic_compliance", "vision"],
-    "bounds": [[10, 125], [0, 1], [0, 20], [0, 1], [3, 7]]
+    "bounds": [[10, 150], [0, 1], [0, 20], [0, 1], [3, 7]]
     }
 
     # Set the repetitions, the amount of steps, and the amount of distinct values per variable
@@ -86,32 +66,38 @@ def main():
 
     time_start = time.time()
 
-    var_name = "vision"
+    # perform OFAT for each variable in problem
+    for var_name in problem["names"]:
 
-    samples = generate_samples(problem, var_name=var_name, distinct_samples=distinct_samples)
+        samples = generate_samples(problem, var_name=var_name, distinct_samples=distinct_samples)
 
-    for sample in samples:
-        print("\nCalculating sample {} = {} out of \n{}".format(var_name, sample, samples))
-        datas = {}
-        for replicate in range(replicates):
-            if var_name == "N_customers":
-                model = CovidSupermarketModel(floorplan, width, height, N_customers=sample)
-            elif var_name == "vaccination_prop":
-                model = CovidSupermarketModel(floorplan, width, height, vaccination_prop=sample)
-            elif var_name == "len_shoplist":
-                model = CovidSupermarketModel(floorplan, width, height, len_shoplist=sample)
-            elif var_name == "basic_compliance":
-                model = CovidSupermarketModel(floorplan, width, height, basic_compliance=sample)
-            elif var_name == "vision":
-                # vision
-                model = CovidSupermarketModel(floorplan, width, height, vision=sample)
+        for sample in samples:
+            print("\nCalculating sample {} = {} out of \n{}".format(var_name, sample, samples))
+            datas = {}
+            for replicate in range(replicates):
 
-            model.run_model(n_steps)
+                # run appropriate model with correct variable parameter
+                # default values for the other parameters are specified in model.py in the
+                # __init__ declaration of CovidSupermarketModel
+                if var_name == "N_customers":
+                    model = CovidSupermarketModel(floorplan, width, height, N_customers=sample)
+                elif var_name == "vaccination_prop":
+                    model = CovidSupermarketModel(floorplan, width, height, vaccination_prop=sample)
+                elif var_name == "len_shoplist":
+                    model = CovidSupermarketModel(floorplan, width, height, len_shoplist=sample)
+                elif var_name == "basic_compliance":
+                    model = CovidSupermarketModel(floorplan, width, height, basic_compliance=sample)
+                elif var_name == "vision":
+                    model = CovidSupermarketModel(floorplan, width, height, vision=sample)
+                else:
+                    raise ValueError("ERROR! Wrong variable name selected!")
 
-            datas["{}_{}_{}".format(var_name, sample, replicate)] = model.datacollector.get_model_vars_dataframe()
+                model.run_model(n_steps)
 
-        # save data
-        saver(datas, var_name)
+                datas["{}_{}_{}".format(var_name, sample, replicate)] = model.datacollector.get_model_vars_dataframe()
+
+            # save data
+            saver(datas)
 
     print("\nTotal simulation time: {:.2f}s".format(time.time()-time_start))
 

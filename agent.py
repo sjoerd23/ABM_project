@@ -10,25 +10,40 @@ class Customer(Agent):
         unique_id (int): a unique identifier for this agent
         model: model object this agent is part of
         pos (x, y): positon of agent on grid
+        avoid_radius (int): radius in grid units in which customers try to avoid each other
+        basic_compliance (float <- [0, 1]): basic level of compliance, higher is more compliant
+        len_shoplist (int <- min. 0): amount of items to place on shopping list
+        patience (float <- [0, 1]): patience of agent, higher is more patient
+        personal_compliance (float <- [0, 1]): personal level compliance, higher is more compliant
         vaccinated (bool): if the customer is vaccinated or not
+        vision (int <- min. 3): amount of grid cells customer can see other customers
 
     Attributes:
+        unique_id (int): a unique identifier for this agent
+        model: model object this agent is part of
         pos (x, y): positon of agent on grid
-        vaccinated (bool): if the customer is vaccinated or not
         is_problematic_contact (bool): if agent is currently in avoid_radius of other agent
+        avoid_radius (int): radius in grid units in which customers try to avoid each other
+        basic_compliance (float <- [0, 1]): basic level of compliance, higher is more compliant
+        len_shoplist (int <- min. 0): amount of items to place on shopping list
+        patience (float <- [0, 1]): patience of agent, higher is more patient
+        patience_0 (float <- [0, 1]): patience of agent on t=0, higher is more patient
+        personal_compliance (float <- [0, 1]): personal level compliance, higher is more compliant
+        vaccinated (bool): if the customer is vaccinated or not
+        vision (int <- min. 3): amount of grid cells customer can see other customers
 
     """
-    EXIT = 99
+    EXIT = 99   # grid cell value of exit of supermarket grid
 
     def __init__(
-        self, unique_id, model, pos, avoid_radius, basic_compliance, len_shoplist, patience, personal_compliance,
-        vaccinated, vision=3
+        self, unique_id, model, pos, avoid_radius, basic_compliance, len_shoplist, patience,
+        personal_compliance, vaccinated, vision=3
     ):
         super().__init__(unique_id, model)
 
+        self.is_problematic_contact = False
         self.avoid_radius = avoid_radius
         self.basic_compliance = basic_compliance
-        self.is_problematic_contact = False
         self.patience = patience
         self.patience_0 = patience # patience op t=0
         self.personal_compliance = personal_compliance
@@ -73,14 +88,22 @@ class Customer(Agent):
         """Calculates multiplier for alternative path B
 
         Returns:
-            total_multiplier: [0, 1.3]
+            total_multiplier (float <- [0, 2]): multiplier to path B cost
+
         """
         total_multiplier = (1 - self.patience) + (1 - self.basic_compliance) + (1 - self.personal_compliance)
         if self.vaccinated:
             total_multiplier += 1
-        return total_multiplier/2
+
+        return total_multiplier / 2
 
     def permute_shopping_list(self, n_permutations):
+        """Permutes the shopping list of the customer
+
+        Args:
+            n_permutations (int): number of permutations of the shopping list
+
+        """
         if len(self.shop_cor_list) > 1:
             for i in range(n_permutations):
                 index1 = self.shop_cor_list.index(self.random.choice(self.shop_cor_list))
@@ -120,17 +143,23 @@ class Customer(Agent):
     def step(self):
         """Progress step in time """
         if not self.routefinder:
-            self.routefinder = route.Route(self.model, self.pos, self.shop_cor_list[0], self.model.grid, forbidden_type=[Obstacle])
+            self.routefinder = route.Route(
+                self.model, self.pos, self.shop_cor_list[0], self.model.grid,
+                forbidden_type=[Obstacle]
+            )
 
         # check if route exists, if so move agent towards the goal
         if self.routefinder.shortest:
+
             # check if there are people in the way
             crowded = self.routefinder.check_if_crowded(self.vision, self.pos)
             if not crowded:
+
                 # our path is free! move the agent to the next step
                 self.routefinder.move_agent(self)
 
             else:
+
                 # our path is crowded, check if goal is within vision
                 if self.routefinder.path_length < self.vision:
                     if self.patience <= 0 or self.is_problematic_contact:
@@ -142,12 +171,18 @@ class Customer(Agent):
                         if self.patience < 0:
                             self.patience = 0
                 else:
+
                     # still far away from goal
                     forbidden_cells = self.model.grid.get_forbidden_cells(self.pos, self.vision)
-                    alternative_route = route.Route(self.model, self.pos, self.shop_cor_list[0], self.model.grid, forbidden_type=[Obstacle], forbidden_cells=forbidden_cells)
+                    alternative_route = route.Route(
+                        self.model, self.pos, self.shop_cor_list[0], self.model.grid,
+                        forbidden_type=[Obstacle], forbidden_cells=forbidden_cells
+                    )
+
                     # check if a alternative route was found
                     if alternative_route.shortest:
-                        alternative_score = alternative_route.path_length * self.get_path_multiplier()
+                        alternative_score = alternative_route.path_length \
+                            * self.get_path_multiplier()
                         current_score = self.routefinder.path_length + crowded
 
                         if alternative_score < current_score:
@@ -178,8 +213,11 @@ class Obstacle(Agent):
         pos (x, y): positon of agent on grid
 
     Attributes:
+        unique_id (int): a unique identifier for this agent
+        model: model object this agent is part of
         pos (x, y): positon of agent on grid
         type_id (int): id to identify type of shelf (products on shelf)
+
     """
     def __init__(self, unique_id, type_id, model, pos):
         super().__init__(unique_id, model)
