@@ -33,6 +33,39 @@ class CanvasGrid2(CanvasGrid):
         return grid_state
 
 
+
+class CanvasHeatGrid(CanvasGrid):
+    """Overrides the default canvas grid to also handle empty cells"""
+    def __init__(self, portrayal_method, grid_width, grid_height, canvas_width=500, canvas_height=500):
+        super().__init__(portrayal_method, grid_width, grid_height, canvas_width, canvas_height)
+
+    def render(self, model):
+        grid_state = defaultdict(list)
+        for x in range(model.heatgrid.width):
+            for y in range(model.heatgrid.height):
+                if isinstance(model.heatgrid[x][y], float):
+
+
+                    portrayal = {"Shape": "rect", "Color": "red", "Filled": "true", "Layer": 0,
+                                 "w": 1, "h": 1, "text": model.heatgrid[x][y], "text_color": "black", "x": x, "y": y}
+                    grid_state[portrayal["Layer"]].append(portrayal)
+                else:
+                    cell_objects = model.heatgrid.get_cell_list_contents([(x, y)])
+
+                    if not cell_objects:
+
+                        portrayal = {"Shape": "square", "Color": "white", "Filled": "true", "Layer": 0,
+                                     "r": 0.5, "text": "({0}, {1}) - {2}".format(x, y, y), "text_color": "black", "x": x, "y": y}
+                        grid_state[portrayal["Layer"]].append(portrayal)
+
+                    for obj in cell_objects:
+                        portrayal = self.portrayal_method(obj)
+                        if portrayal:
+                            portrayal["x"] = x
+                            portrayal["y"] = y
+                            grid_state[portrayal["Layer"]].append(portrayal)
+        return grid_state
+
 def agent_portrayal(agent):
     portrayal = {}
     if type(agent) == Customer:
@@ -61,13 +94,25 @@ def agent_portrayal(agent):
     return portrayal
 
 
+
+def heat_agent_portrayal(agent):
+    portrayal = {}
+    if type(agent) == Obstacle:
+        portrayal = {"Shape": "rect",
+                     "Color": "black",
+                     "Filled": "true",
+                     "Layer": 0,
+                     "w": 1,
+                     "h": 1,
+                     "text_color": "white"}
+    return portrayal
 # load supermarket floorplan for simulation
 floorplan = core.load_floorplan("data/albert_excel_test.csv")
 width = len(floorplan)
 height = len(floorplan[0])
 
 grid = CanvasGrid2(agent_portrayal, width, height, 800, 600)
-
+heatgrid = CanvasHeatGrid(heat_agent_portrayal, width, height, 800, 600)
 # no chart for the moment. Just leaving it here, because then it will be easy to make a new chart
 # for different variables
 chart = ChartModule(
@@ -100,7 +145,7 @@ model_params = {
 }
 
 server = ModularServer(model.CovidSupermarketModel,
-                       [grid, chart],
+                       [grid, heatgrid, chart],
                        "Supermarket Covid Model",
                        model_params)
 

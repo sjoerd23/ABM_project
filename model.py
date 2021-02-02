@@ -10,6 +10,7 @@ import core
 from agent import Customer, Obstacle
 from space import SuperMarketGrid
 
+import copy
 
 class CovidSupermarketModel(Model):
     """Model of agents (Customers) in a store with obstacles
@@ -89,6 +90,10 @@ class CovidSupermarketModel(Model):
                     self.coord_start_area.append((i, j))
 
 
+        # use heatgrid
+        self.heatgrid = copy.deepcopy(self.grid)
+        print(self.heatgrid[4][52])
+        print("hallo meneertje")
         # start adding customers
         for _ in range(N_customers):
             self.add_customer(self.get_free_pos())
@@ -172,8 +177,17 @@ class CovidSupermarketModel(Model):
                             if neighbor.pos not in safe_pos:
                                 if not neighbor.vaccinated:
                                     self.n_problematic_contacts += 1
-                                    neighbor.is_problematic_contact = True
 
+                                    neighbor.is_problematic_contact = True
+                                    print("haller")
+                                    if not self.heatgrid[neighbor.pos[0]][neighbor.pos[1]]:
+                                        self.heatgrid[neighbor.pos[0]][neighbor.pos[1]] = 0.5
+                                    else:
+                                        self.heatgrid[neighbor.pos[0]][neighbor.pos[1]] += 0.5
+                                        print(self.heatgrid[neighbor.pos[0]][neighbor.pos[1]])
+                                        print("hello")
+
+                                    # take the agent
         # divide by 2, because we count contacts double
         self.n_problematic_contacts = int(self.n_problematic_contacts / 2)
 
