@@ -29,11 +29,13 @@ def plot_index(s, params, i, title=""):
 
     l = len(indices)
 
-    plt.title(title)
+    # plt.title(title)
     plt.ylim([-0.2, len(indices) - 1 + 0.2])
     plt.yticks(range(l), params)
     plt.errorbar(indices, range(l), xerr=errors, linestyle="None", marker="o")
     plt.axvline(0, c="k")
+
+    plt.savefig("./results/Sobol_{}_paper.png".format(i))
 
 
 def generate_samples(problem, distinct_samples, sample_index):
@@ -50,7 +52,7 @@ def generate_samples(problem, distinct_samples, sample_index):
     """
     params = saltelli.sample(problem, distinct_samples, calc_second_order=False)
     len_params = len(params)
-    params_array = [params[i * int(len_params/5) : (i+1) * int(len_params/5)] for i in range(5)]
+    params_array = [params[i * int(len_params/5): (i+1) * int(len_params/5)] for i in range(5)]
 
     return params_array[sample_index]
 
@@ -74,67 +76,67 @@ def main():
 
     # you can use this to calculate only fifth parts of the sample matrix when setting sample_index
     # to a value between 0 and 5
-    for sample_index in range(5):
-
-        print("Using sample_index {}".format(sample_index))
-        print("Using {} distinct samples in total\n".format(distinct_samples))
-
-        params = generate_samples(problem, distinct_samples, sample_index)
-
-        print("Estimated time: {:.2f} hours".format(len(params)*2/60))
-        print("Estimated time per computer (5): {:.2f} hours\n".format((len(params)*2/60)/5))
-
-        data = pd.DataFrame(
-            index=range(len(params)),
-            columns=[
-                "N_customers", "vaccination_prop", "len_shoplist", "basic_compliance", "vision",
-                "run", "n_problematic_contacts", "n_problematic_contacts_mean",
-                "n_problematic_contacts_mean_100"
-            ]
-        )
-
-        time_start = time.time()
-
-        count = 0
-        for i, vals in enumerate(params):
-
-            # change parameters that should be integers i.e. index 0, 2, 4
-            vals = list(vals)
-            vals[0] = int(vals[0])
-            vals[2] = int(vals[2])
-            vals[4] = int(vals[4])
-
-            print("Progress: {:.2%}".format(float(i)/len(params)))
-            print("Calculating sample {}".format(vals))
-
-            model = CovidSupermarketModel(
-                floorplan, width, height, vals[0], vals[1], vals[2], vals[3], vals[4]
-            )
-            model.run_model(n_steps)
-
-            data_run = model.datacollector.get_model_vars_dataframe()
-            data_run_n_problematic_contacts = data_run.iloc[-1]
-            data_run_n_problematic_contacts_mean = np.mean(data_run["n_problematic_contacts"])
-            data_run_n_problematic_contacts_mean_100 = np.mean(
-                data_run["n_problematic_contacts"][100:]
-            )
-
-            data.iloc[count, 5] = count
-            data.iloc[count, 6] = int(data_run_n_problematic_contacts)
-            data.iloc[count, 7] = float(data_run_n_problematic_contacts_mean)
-            data.iloc[count, 8] = float(data_run_n_problematic_contacts_mean_100)
-            data.iloc[count, 0:5] = vals
-
-            # save dataframe each iteration to prevent losing data. If all goes well, then only the
-            # last saved dataframe should be used for analysis
-            data.to_csv(
-                "results/Sobol/data_{}_{}.csv".format(
-                    str(list(data_params[0])).replace(",", "").replace(" ", "_"), count
-                )
-            )
-            count += 1
-
-        print("\nTotal simulation time: {:.2f}s".format(time.time()-time_start))
+    # for sample_index in range(5):
+    #
+    #     print("Using sample_index {}".format(sample_index))
+    #     print("Using {} distinct samples in total\n".format(distinct_samples))
+    #
+    #     params = generate_samples(problem, distinct_samples, sample_index)
+    #
+    #     print("Estimated time: {:.2f} hours".format(len(params)*2/60))
+    #     print("Estimated time per computer (5): {:.2f} hours\n".format((len(params)*2/60)/5))
+    #
+    #     data = pd.DataFrame(
+    #         index=range(len(params)),
+    #         columns=[
+    #             "N_customers", "vaccination_prop", "len_shoplist", "basic_compliance", "vision",
+    #             "run", "n_problematic_contacts", "n_problematic_contacts_mean",
+    #             "n_problematic_contacts_mean_100"
+    #         ]
+    #     )
+    #
+    #     time_start = time.time()
+    #
+    #     count = 0
+    #     for i, vals in enumerate(params):
+    #
+    #         # change parameters that should be integers i.e. index 0, 2, 4
+    #         vals = list(vals)
+    #         vals[0] = int(vals[0])
+    #         vals[2] = int(vals[2])
+    #         vals[4] = int(vals[4])
+    #
+    #         print("Progress: {:.2%}".format(float(i)/len(params)))
+    #         print("Calculating sample {}".format(vals))
+    #
+    #         model = CovidSupermarketModel(
+    #             floorplan, width, height, vals[0], vals[1], vals[2], vals[3], vals[4]
+    #         )
+    #         model.run_model(n_steps)
+    #
+    #         data_run = model.datacollector.get_model_vars_dataframe()
+    #         data_run_n_problematic_contacts = data_run.iloc[-1]
+    #         data_run_n_problematic_contacts_mean = np.mean(data_run["n_problematic_contacts"])
+    #         data_run_n_problematic_contacts_mean_100 = np.mean(
+    #             data_run["n_problematic_contacts"][100:]
+    #         )
+    #
+    #         data.iloc[count, 5] = count
+    #         data.iloc[count, 6] = int(data_run_n_problematic_contacts)
+    #         data.iloc[count, 7] = float(data_run_n_problematic_contacts_mean)
+    #         data.iloc[count, 8] = float(data_run_n_problematic_contacts_mean_100)
+    #         data.iloc[count, 0:5] = vals
+    #
+    #         # save dataframe each iteration to prevent losing data. If all goes well, then only the
+    #         # last saved dataframe should be used for analysis
+    #         data.to_csv(
+    #             "results/Sobol/data_{}_{}.csv".format(
+    #                 str(list(data_params[0])).replace(",", "").replace(" ", "_"), count
+    #             )
+    #         )
+    #         count += 1
+    #
+    #     print("\nTotal simulation time: {:.2f}s".format(time.time()-time_start))
 
     # this is for analyzing. Comment when doing the actual runs
     # unnamed column is the original index column of the original dataframe

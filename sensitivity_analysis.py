@@ -21,7 +21,7 @@ def saver(dictex):
     for key, val in dictex.items():
         val.to_csv("results/data_{}.csv".format(str(key)))
 
-    with open("results/keys_{}.txt".format(str(key)), "w") as f: #saving keys to file
+    with open("results/keys_{}.txt".format(str(key)), "w") as f:  # saving keys to file
         f.write(str(list(dictex.keys())))
 
 
@@ -45,6 +45,7 @@ def generate_samples(problem, var_name, distinct_samples):
                 samples = np.linspace(*problem['bounds'][i], num=distinct_samples, dtype=int)
 
             return samples
+
 
 def main():
 

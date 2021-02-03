@@ -180,7 +180,6 @@ def color_gradient(high_cont_val, cell_val):
             return color_dict.get(round(color_key, 2))
 
 
-
 def heat_agent_portrayal(agent):
     """Portrayal of Obstacles in heat map """
     portrayal = {}

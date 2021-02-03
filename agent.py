@@ -45,7 +45,7 @@ class Customer(Agent):
         self.avoid_radius = avoid_radius
         self.basic_compliance = basic_compliance
         self.patience = patience
-        self.patience_0 = patience # patience op t=0
+        self.patience_0 = patience  # patience op t=0
         self.personal_compliance = personal_compliance
         self.pos = pos
         self.routefinder = None
@@ -214,6 +214,7 @@ class Customer(Agent):
             # exit point reached, remove agent
             if len(self.shop_cor_list) == 0:
                 self.model.agents_to_remove.append(self)
+
 
 class Obstacle(Agent):
     """
