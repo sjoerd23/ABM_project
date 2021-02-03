@@ -94,7 +94,8 @@ def main():
 
                 model.run_model(n_steps)
 
-                datas["{}_{}_{}".format(var_name, sample, replicate)] = model.datacollector.get_model_vars_dataframe()
+                datas["{}_{}_{}".format(var_name, sample, replicate)] = model.datacollector.\
+                    get_model_vars_dataframe()
 
             # save data
             saver(datas)
