@@ -7,110 +7,11 @@ import model
 import core
 from agent import Customer, Obstacle
 
-
-class CanvasGrid2(CanvasGrid):
-    """Overrides the default canvas grid to also handle empty cells"""
-    def __init__(self, portrayal_method, grid_width, grid_height, canvas_width=500, canvas_height=500):
-        super().__init__(portrayal_method, grid_width, grid_height, canvas_width, canvas_height)
-
-    def render(self, model):
-        grid_state = defaultdict(list)
-        for x in range(model.grid.width):
-            for y in range(model.grid.height):
-                cell_objects = model.grid.get_cell_list_contents([(x, y)])
-                score = model.grid.get_score((x, y))
-                if not cell_objects:
-
-                    portrayal = {"Shape": "square", "Color": "white", "Filled": "true", "Layer": 0,
-                                 "r": 0.5, "text": "({0}, {1}) - {2}".format(x, y, score), "text_color": "black", "x": x, "y": y}
-                    grid_state[portrayal["Layer"]].append(portrayal)
-                for obj in cell_objects:
-                    portrayal = self.portrayal_method(obj)
-                    if portrayal:
-                        portrayal["x"] = x
-                        portrayal["y"] = y
-                        grid_state[portrayal["Layer"]].append(portrayal)
-        return grid_state
-
-
-
-class CanvasHeatGrid(CanvasGrid):
-    """Overrides the default canvas grid to also handle empty cells"""
-    def __init__(self, portrayal_method, grid_width, grid_height, canvas_width=500, canvas_height=500):
-        super().__init__(portrayal_method, grid_width, grid_height, canvas_width, canvas_height)
-
-    def render(self, model):
-        grid_state = defaultdict(list)
-
-        high_cont_val = 0
-
-        # determine what the maximum value of problematic contacts is which can be used for scaling the colours of a heatmap.
-        for x in range(model.heatgrid.width):
-            for y in range(model.heatgrid.height):
-                if isinstance(model.heatgrid[x][y], float):
-                    if model.heatgrid[x][y] > high_cont_val:
-                        high_cont_val = model.heatgrid[x][y]
-
-        for x in range(model.heatgrid.width):
-            for y in range(model.heatgrid.height):
-                if isinstance(model.heatgrid[x][y], float):
-
-                    cell_color = color_gradient(high_cont_val, model.heatgrid[x][y])
-                    # print(cell_color, "cell color")
-                    portrayal = {"Shape": "rect", "Color": cell_color, "Filled": "true", "Layer": 0,
-                                 "w": 1, "h": 1, "x": x, "y": y}
-                    grid_state[portrayal["Layer"]].append(portrayal)
-                else:
-                    cell_objects = model.heatgrid.get_cell_list_contents([(x, y)])
-
-                    if not cell_objects:
-
-                        portrayal = {"Shape": "square", "Color": "white", "Filled": "true", "Layer": 0,
-                                     "r": 0.5, "text": "({0}, {1}) - {2}".format(x, y, y), "text_color": "black", "x": x, "y": y}
-                        grid_state[portrayal["Layer"]].append(portrayal)
-
-                    for obj in cell_objects:
-                        portrayal = self.portrayal_method(obj)
-                        if portrayal:
-                            portrayal["x"] = x
-                            portrayal["y"] = y
-                            grid_state[portrayal["Layer"]].append(portrayal)
-        return grid_state
-
-def agent_portrayal(agent):
-    portrayal = {}
-    if type(agent) == Customer:
-        portrayal = {"Shape": "circle",
-                     "Filled": "true",
-                     "color": "yellow",
-                     "Layer":   0,
-                     "r": 0.9,
-                     "text_color": "white"}
-        if agent.vaccinated:
-            portrayal["Color"] = "green"
-        else:
-            if agent.is_problematic_contact:
-                portrayal["Color"] = "red"
-            else:
-                portrayal["Color"] = "blue"
-
-    elif type(agent) == Obstacle:
-        portrayal = {"Shape": "rect",
-                     "Color": "black",
-                     "Filled": "true",
-                     "Layer": 0,
-                     "w": 1,
-                     "h": 1,
-                     "text_color": "white"}
-    return portrayal
-
-
-
-
+# dictionary containing color scales for heat map
 color_dict = {
-    0.02: "#fef5f3",
-    0.04: "#fdefeb",
-    0.06: "#fde8e3",
+    0.02    : "#fef5f3",
+    0.04    : "#fdefeb",
+    0.06    : "#fde8e3",
     0.08	: "#fde2dc",
     0.10	: "#fcdcd4",
     0.12	: "#fcd6cc",
@@ -160,9 +61,116 @@ color_dict = {
     1.00	: "#5c1605"
 }
 
-#
+
+class CanvasGridCustom(CanvasGrid):
+    """Overrides the default canvas grid to also handle empty cells """
+    def __init__(
+        self, portrayal_method, grid_width, grid_height, canvas_width=500, canvas_height=500
+    ):
+        super().__init__(portrayal_method, grid_width, grid_height, canvas_width, canvas_height)
+
+    def render(self, model):
+        grid_state = defaultdict(list)
+        for x in range(model.grid.width):
+            for y in range(model.grid.height):
+                cell_objects = model.grid.get_cell_list_contents([(x, y)])
+                score = model.grid.get_score((x, y))
+                if not cell_objects:
+
+                    portrayal = {
+                        "Shape": "square", "Color": "white", "Filled": "true", "Layer": 0, "r": 0.5,
+                        "text": "({0}, {1}) - {2}".format(x, y, score), "text_color": "black",
+                        "x": x, "y": y
+                    }
+                    grid_state[portrayal["Layer"]].append(portrayal)
+                for obj in cell_objects:
+                    portrayal = self.portrayal_method(obj)
+                    if portrayal:
+                        portrayal["x"] = x
+                        portrayal["y"] = y
+                        grid_state[portrayal["Layer"]].append(portrayal)
+        return grid_state
+
+
+class CanvasHeatGrid(CanvasGrid):
+    """Overrides the default canvas grid to apply heat map for number of problematic contacts """
+    def __init__(
+        self, portrayal_method, grid_width, grid_height, canvas_width=500, canvas_height=500
+    ):
+        super().__init__(portrayal_method, grid_width, grid_height, canvas_width, canvas_height)
+
+    def render(self, model):
+        grid_state = defaultdict(list)
+        high_cont_val = 0
+
+        # determine what the maximum value of problematic contacts is which can be used for scaling
+        # the colours of a heatmap.
+        for x in range(model.heatgrid.width):
+            for y in range(model.heatgrid.height):
+                if isinstance(model.heatgrid[x][y], float):
+                    if model.heatgrid[x][y] > high_cont_val:
+                        high_cont_val = model.heatgrid[x][y]
+
+        for x in range(model.heatgrid.width):
+            for y in range(model.heatgrid.height):
+                if isinstance(model.heatgrid[x][y], float):
+
+                    cell_color = color_gradient(high_cont_val, model.heatgrid[x][y])
+                    # print(cell_color, "cell color")
+                    portrayal = {
+                        "Shape": "rect", "Color": cell_color, "Filled": "true", "Layer": 0, "w": 1,
+                        "h": 1, "x": x, "y": y
+                    }
+                    grid_state[portrayal["Layer"]].append(portrayal)
+                else:
+                    cell_objects = model.heatgrid.get_cell_list_contents([(x, y)])
+
+                    if not cell_objects:
+
+                        portrayal = {
+                            "Shape": "square", "Color": "white", "Filled": "true", "Layer": 0,
+                            "r": 0.5, "text": "({0}, {1}) - {2}".format(x, y, y),
+                            "text_color": "black", "x": x, "y": y
+                        }
+                        grid_state[portrayal["Layer"]].append(portrayal)
+
+                    for obj in cell_objects:
+                        portrayal = self.portrayal_method(obj)
+                        if portrayal:
+                            portrayal["x"] = x
+                            portrayal["y"] = y
+                            grid_state[portrayal["Layer"]].append(portrayal)
+
+        return grid_state
+
+
+def agent_portrayal(agent):
+    """Portrayal of Customers and Obstacles """
+    portrayal = {}
+    if type(agent) == Customer:
+        portrayal = {
+            "Shape": "circle", "Filled": "true", "color": "yellow", "Layer":   0, "r": 0.9,
+            "text_color": "white"
+        }
+        if agent.vaccinated:
+            portrayal["Color"] = "green"
+        else:
+            if agent.is_problematic_contact:
+                portrayal["Color"] = "red"
+            else:
+                portrayal["Color"] = "blue"
+
+    elif type(agent) == Obstacle:
+        portrayal = {
+            "Shape": "rect", "Color": "black", "Filled": "true", "Layer": 0, "w": 1, "h": 1,
+            "text_color": "white"
+        }
+
+    return portrayal
+
 
 def color_gradient(high_cont_val, cell_val):
+    """Calculate corresponding colour to number of problematic contacts on a cell """
     frac_cont = cell_val / high_cont_val
 
     for i in range(1, 51):
@@ -174,15 +182,14 @@ def color_gradient(high_cont_val, cell_val):
 
 
 def heat_agent_portrayal(agent):
+    """Portrayal of Obstacles in heat map """
     portrayal = {}
     if type(agent) == Obstacle:
-        portrayal = {"Shape": "rect",
-                     "Color": "black",
-                     "Filled": "true",
-                     "Layer": 0,
-                     "w": 1,
-                     "h": 1,
-                     "text_color": "white"}
+        portrayal = {
+            "Shape": "rect", "Color": "black", "Filled": "true", "Layer": 0, "w": 1, "h": 1,
+            "text_color": "white"
+    }
+
     return portrayal
 
 
@@ -191,8 +198,9 @@ floorplan = core.load_floorplan("data/albert_excel_test.csv")
 width = len(floorplan)
 height = len(floorplan[0])
 
-grid = CanvasGrid2(agent_portrayal, width, height, 800, 600)
+grid = CanvasGridCustom(agent_portrayal, width, height, 800, 600)
 heatgrid = CanvasHeatGrid(heat_agent_portrayal, width, height, 800, 600)
+
 # no chart for the moment. Just leaving it here, because then it will be easy to make a new chart
 # for different variables
 chart = ChartModule(
@@ -230,5 +238,3 @@ server = ModularServer(model.CovidSupermarketModel,
                        model_params)
 
 server.port = 8521
-
-# moved server.launch() to run.py. Gave some issues for me if I placed it here
