@@ -1,6 +1,6 @@
 import numpy as np
 import time
-import tqdm
+import copy
 from mesa import Model
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
@@ -10,7 +10,6 @@ import core
 from agent import Customer, Obstacle
 from space import SuperMarketGrid
 
-import copy
 
 class CovidSupermarketModel(Model):
     """Model of agents (Customers) in a supermarket
