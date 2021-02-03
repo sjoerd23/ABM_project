@@ -134,6 +134,8 @@ def main():
             )
             count += 1
 
+        print("\nTotal simulation time: {:.2f}s".format(time.time()-time_start))
+
     # this is for analyzing. Comment when doing the actual runs
     # unnamed column is the original index column of the original dataframe
     data_analyze = pd.DataFrame(
@@ -172,8 +174,6 @@ def main():
     plot_index(Si_problematic_contacts, problem["names"], "T", "Total order sensitivity")
 
     plt.show()
-
-    print("\nTotal simulation time: {:.2f}s".format(time.time()-time_start))
 
     return
 
