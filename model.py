@@ -54,7 +54,6 @@ class CovidSupermarketModel(Model):
     ):
         super().__init__()
 
-
         # init basic properties
         self.floorplan = floorplan
         self.width = width
@@ -83,7 +82,7 @@ class CovidSupermarketModel(Model):
                     self.new_obstacle((i, j), self.floorplan[i][j])
 
         # adjacency matrix
-        adjacency = [(i,j) for i in (-1,0,1) for j in (-1,0,1) if not (i == j == 0)]
+        adjacency = [(i, j) for i in (-1, 0, 1) for j in (-1, 0, 1) if not (i == j == 0)]
 
         # get the coordinates of all the shelves,
         # and the coordinates of accesible spaces around them to a dict
@@ -93,11 +92,11 @@ class CovidSupermarketModel(Model):
                 if shelf_val < self.SHELF_THRESHOLD:
                     free_space = False
                     for cor in adjacency:
-                        if int(self.floorplan[i + cor[0]][j + cor[1]])> self.SHELF_THRESHOLD:
+                        if int(self.floorplan[i + cor[0]][j + cor[1]]) > self.SHELF_THRESHOLD:
                             if shelf_val in self.coord_shelf.keys():
                                 self.coord_shelf[shelf_val].add((i + cor[0], j + cor[1]))
                             else:
-                                self.coord_shelf.update({shelf_val : {(i + cor[0], j + cor[1])}})
+                                self.coord_shelf.update({shelf_val: {(i + cor[0], j + cor[1])}})
 
                             free_space = True
                     if not free_space:
