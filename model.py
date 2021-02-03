@@ -107,7 +107,6 @@ class CovidSupermarketModel(Model):
                 if shelf_val == 101:
                     self.coord_start_area.append((i, j))
 
-
         # use heatgrid
         self.heatgrid = copy.deepcopy(self.grid)
 
@@ -127,19 +126,41 @@ class CovidSupermarketModel(Model):
         self.datacollector.collect(self)
 
     def is_occupied(self, pos):
-        """Check if a cell or region around a cell is occupied (pos)"""
+        """Check if a cell or region around a cell is occupied (pos)
+
+        Args:
+            pos (x, y): positon of agent on grid
+
+        Returns:
+            Boolean: true if occupied, else false
+        """
         cell = self.grid.get_cell_list_contents([pos])
         return len(cell) > 0
 
     def get_unoccupied(self, pos, radius, moore):
-        """Returns the unoccupied cells in region around a cell"""
+        """Returns the unoccupied cells in region around a cell
+
+        Args:
+            pos (x, y): positon of agent on grid
+            radius (int): radius from center to get unoccupied cells
+            moore (boolean): if true use moore neighborhood, else van Neumann
+
+        Returns:
+            list: list of unoccupied cells
+
+        """
         neighborhood = self.grid.get_neighborhood(pos, moore, radius=radius)
         neighbors_pos = [x.pos for x in self.grid.get_neighbors(pos, moore, radius=radius)]
+
         return list([x for x in neighborhood if x not in neighbors_pos])
 
     def add_customer(self, pos):
-        """Adds a new agent to a random location on the grid. Returns the created agent"""
+        """Adds a new agent to a random location on the grid. Returns the created agent
 
+        Args:
+            pos (x, y): positon of agent on grid
+
+        """
         # vaccinate this customer according to proportion vaccinated of population
         if self.vaccination_prop > self.random.random():
             vaccinated = True
@@ -162,14 +183,22 @@ class CovidSupermarketModel(Model):
                 free_pos.append(pos)
         if free_pos:
             return self.random.choice(free_pos)
+
         return None
 
     def new_obstacle(self, pos, type_id):
-        """Adds a new agent as obstacle to a random location on the grid. Returns the created 4
-        agent
+        """Adds a new agent as obstacle to a random location on the grid
+
+        Args:
+            pos (x, y): positon of agent on grid
+            type_id (int): shelf id for obstacle
+
+        Returns:
+            new_agent (Obstacle): newly created Obstacle object
         """
         new_agent = Obstacle(self.next_id(), type_id, self, pos)
         self.grid.place_agent(new_agent, pos)
+
         return new_agent
 
     def problematic_contacts(self):
@@ -206,7 +235,12 @@ class CovidSupermarketModel(Model):
         self.n_problematic_contacts = int(self.n_problematic_contacts / 2)
 
     def get_free_pos(self):
-        """Find free position on grid. If there are none left, exit program"""
+        """Find free position on grid. If there are none left, exit program
+
+        Returns:
+            pos (x, y): free positon on grid
+
+        """
         if not self.grid.empties:
             print("Error! No empty cells found! Lower the amount of agents or enlarge the grid")
             exit(-1)
