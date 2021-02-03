@@ -56,9 +56,9 @@ class CanvasHeatGrid(CanvasGrid):
                 if isinstance(model.heatgrid[x][y], float):
 
                     cell_color = color_gradient(high_cont_val, model.heatgrid[x][y])
-                    print(cell_color, "cell color")
+                    # print(cell_color, "cell color")
                     portrayal = {"Shape": "rect", "Color": cell_color, "Filled": "true", "Layer": 0,
-                                 "w": 1, "h": 1, "text": model.heatgrid[x][y], "text_color": "black", "x": x, "y": y}
+                                 "w": 1, "h": 1, "x": x, "y": y}
                     grid_state[portrayal["Layer"]].append(portrayal)
                 else:
                     cell_objects = model.heatgrid.get_cell_list_contents([(x, y)])
@@ -168,7 +168,7 @@ def color_gradient(high_cont_val, cell_val):
     for i in range(1, 51):
         if i * 0.02 >= frac_cont:
             color_key = i * 0.02
-            print(color_key, "color key")
+            # print(color_key, "color key")
             return color_dict.get(round(color_key, 2))
 
 
@@ -184,6 +184,8 @@ def heat_agent_portrayal(agent):
                      "h": 1,
                      "text_color": "white"}
     return portrayal
+
+
 # load supermarket floorplan for simulation
 floorplan = core.load_floorplan("data/albert_excel_test.csv")
 width = len(floorplan)

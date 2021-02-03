@@ -64,8 +64,10 @@ class Customer(Agent):
         shop_list.sort()
 
         # edit shoppinglist according to location ag ent was spawned in
-        # 100 is the precise difference between the number used for a shelve, and the number used for an empty are near a shelve
-        spawn_value = int(self.model.floorplan[self.pos[0]][self.pos[1]]) - self.model.SHELF_THRESHOLD
+        # 100 is the precise difference between the number used for a shelve,
+        # and the number used for an empty are near a shelve
+        spawn_value = int(self.model.floorplan[self.pos[0]][self.pos[1]]) \
+            - self.model.SHELF_THRESHOLD
 
         # delete all items from shoplift that have a lower int, than spawn_value
         new_shop_list = []
@@ -91,7 +93,9 @@ class Customer(Agent):
             total_multiplier (float <- [0, 2]): multiplier to path B cost
 
         """
-        total_multiplier = (1 - self.patience) + (1 - self.basic_compliance) + (1 - self.personal_compliance)
+        total_multiplier = (1 - self.patience) \
+                         + (1 - self.basic_compliance) \
+                         + (1 - self.personal_compliance)
         if self.vaccinated:
             total_multiplier += 1
 
@@ -196,11 +200,20 @@ class Customer(Agent):
                 self.routefinder = None
                 self.shop_cor_list.pop(0)
 
+            # exit point reached, remove agent
             if len(self.shop_cor_list) == 0:
-                self.model.grid.remove_agent(self)
-                self.model.schedule.remove(self)
-                self.model.customers.remove(self)
+                self.model.agents_to_remove.append(self)
 
+        else:
+
+            # if no route is found to next item on shopping list, remove item from list and try
+            # to find a route to a next item in the next call to this step() function
+            self.routefinder = None
+            self.shop_cor_list.pop(0)
+
+            # exit point reached, remove agent
+            if len(self.shop_cor_list) == 0:
+                self.model.agents_to_remove.append(self)
 
 class Obstacle(Agent):
     """

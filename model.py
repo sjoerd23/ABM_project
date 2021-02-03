@@ -39,6 +39,8 @@ class CovidSupermarketModel(Model):
     ):
         super().__init__()
 
+        self.agents_to_remove = []
+
         # init basic properties
         self.floorplan = floorplan
         self.width = width
@@ -92,8 +94,7 @@ class CovidSupermarketModel(Model):
 
         # use heatgrid
         self.heatgrid = copy.deepcopy(self.grid)
-        print(self.heatgrid[4][52])
-        print("hallo meneertje")
+
         # start adding customers
         for _ in range(N_customers):
             self.add_customer(self.get_free_pos())
@@ -184,10 +185,7 @@ class CovidSupermarketModel(Model):
                                         self.heatgrid[neighbor.pos[0]][neighbor.pos[1]] = 0.5
                                     else:
                                         self.heatgrid[neighbor.pos[0]][neighbor.pos[1]] += 0.5
-                                        print(self.heatgrid[neighbor.pos[0]][neighbor.pos[1]])
-                                        print(neighbor.pos, "contat value")
 
-                                    # take the agent
         # divide by 2, because we count contacts double
         self.n_problematic_contacts = int(self.n_problematic_contacts / 2)
 
@@ -216,6 +214,14 @@ class CovidSupermarketModel(Model):
                 self.add_customer(new_pos)
 
         self.schedule.step()
+
+        # remove agents from environment
+        if self.agents_to_remove:
+            for agent in self.agents_to_remove:
+                self.grid.remove_agent(agent)
+                self.schedule.remove(agent)
+                self.customers.remove(agent)
+            self.agents_to_remove = []
 
         # calculate number of problematic contacts
         self.problematic_contacts()
