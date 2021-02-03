@@ -13,25 +13,41 @@ from space import SuperMarketGrid
 import copy
 
 class CovidSupermarketModel(Model):
-    """Model of agents (Customers) in a store with obstacles
+    """Model of agents (Customers) in a supermarket
 
     Args:
-        N_customers (int): total number of customers
-        vaccination_prop (float between 0 and 1): proportion of customers that is vaccinated
+        floorplan (2D list): grid with corresponding values of input map from supermarket
+        width (int): width of grid
+        height (int): height of grid
+        N_customers (int <- min. 0): total number of customers
+        vaccination_prop (float <- [0, 1]): proportion of customers that is vaccinated
+        len_shoplist (int <- min. 0): amount of items to place on shopping list
+        basic_compliance (float <- [0, 1]): basic level of compliance, higher is more compliant
+        vision (int <- min. 3): amount of grid cells customer can see other customers
 
     Attributes:
+        floorplan (2D list): grid with corresponding values of input map from supermarket
+        width (int): width of grid
+        height (int): height of grid
+        N_customers (int <- min. 0): total number of customers
+        vaccination_prop (float <- [0, 1]): proportion of customers that is vaccinated
+        len_shoplist (int <- min. 0): amount of items to place on shopping list
+        basic_compliance (float <- [0, 1]): basic level of compliance, higher is more compliant
+        vision (int <- min. 3): amount of grid cells customer can see other customers
+        agents_to_remove (list): agents that will be removed after a single simulation step
         datacollector: DataCollector object to collect data for analyzing simulation
         grid: grid of environment
-        N_customers (int): total number of customers
-        schedule: schedule for updating model to next time frame
-        vaccination_prop (float between 0 and 1): proportion of customers that is vaccinated
+        heatgrid: grid of environment for heat map
         n_problematic_contacts (int): number of contacts violating distant rules
+        running (boolean): if true keeps the simulation running
+        schedule: schedule for updating model to next time frame
+
     """
     description = "Supermarket Covid Model.\
     Agent color represents its status: vaccinated (green), problematic contact (red), else (blue).\
     "
-    SHELF_THRESHOLD = 100
-    AVOID_RADIUS = 3
+    SHELF_THRESHOLD = 100   # special value for which there is difference between shelf and area
+    AVOID_RADIUS = 3        # 3 corresponds to a distance keeping of 1.5 meter
 
     def __init__(
         self, floorplan, width, height, N_customers=100, vaccination_prop=0.2, len_shoplist=10,
@@ -39,7 +55,6 @@ class CovidSupermarketModel(Model):
     ):
         super().__init__()
 
-        self.agents_to_remove = []
 
         # init basic properties
         self.floorplan = floorplan
@@ -51,10 +66,11 @@ class CovidSupermarketModel(Model):
         self.basic_compliance = basic_compliance
         self.vision = vision
 
+        self.agents_to_remove = []
         self.customers = []
-        self.exit_list = []
         self.coord_shelf = {}
         self.coord_start_area = []
+        self.exit_list = []
 
         self.schedule = RandomActivation(self)
         self.running = True     # needed to keep simulation running
