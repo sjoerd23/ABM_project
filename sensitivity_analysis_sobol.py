@@ -87,8 +87,8 @@ def main():
         data = pd.DataFrame(
             index=range(len(params)),
             columns=[
-                "N_customers", "vaccination_prop", "len_shoplist", "basic_compliance", "vision", "run",
-                "n_problematic_contacts", "n_problematic_contacts_mean",
+                "N_customers", "vaccination_prop", "len_shoplist", "basic_compliance", "vision",
+                "run", "n_problematic_contacts", "n_problematic_contacts_mean",
                 "n_problematic_contacts_mean_100"
             ]
         )
@@ -115,7 +115,9 @@ def main():
             data_run = model.datacollector.get_model_vars_dataframe()
             data_run_n_problematic_contacts = data_run.iloc[-1]
             data_run_n_problematic_contacts_mean = np.mean(data_run["n_problematic_contacts"])
-            data_run_n_problematic_contacts_mean_100 = np.mean(data_run["n_problematic_contacts"][100:])
+            data_run_n_problematic_contacts_mean_100 = np.mean(
+                data_run["n_problematic_contacts"][100:]
+            )
 
             data.iloc[count, 5] = count
             data.iloc[count, 6] = int(data_run_n_problematic_contacts)
@@ -125,7 +127,11 @@ def main():
 
             # save dataframe each iteration to prevent losing data. If all goes well, then only the
             # last saved dataframe should be used for analysis
-            data.to_csv("results/Sobol/data_{}_{}.csv".format(params[0], count))
+            data.to_csv(
+                "results/Sobol/data_{}_{}.csv".format(
+                    str(list(data_params[0])).replace(",", "").replace(" ", "_"), count
+                )
+            )
             count += 1
 
     # this is for analyzing. Comment when doing the actual runs
@@ -142,7 +148,11 @@ def main():
     for i in range(5):
         data_params = generate_samples(problem, distinct_samples, i)
         data_count = len(data_params) - 1
-        datas.append(pd.read_csv("results/Sobol/data_{}_{}.csv".format(data_params[0], data_count)))
+        datas.append(
+            pd.read_csv("results/Sobol/data_{}_{}.csv".format(
+                str(list(data_params[0])).replace(",", "").replace(" ", "_"), data_count)
+            )
+        )
 
     data = pd.concat(
         [data_analyze, datas[0], datas[1], datas[2], datas[3], datas[4]],
